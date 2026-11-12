@@ -1,0 +1,383 @@
+/* Material Search in Insights Mono. A dollar sign starts a token of
+   insights-mono/tokens.json; run node tools/build-tokens.js after a change.
+   The values follow material-search.html, which is the reference. Type roles
+   (face, size, weight, tracking) are set in code through Pango, because St's
+   CSS cannot reach the axes of a variable font; only colours and geometry are
+   here. */
+
+.ms-backdrop {
+    background-color: transparent;
+}
+
+/* The floating capsule. One static shadow, no blur behind it. */
+.ms-capsule {
+    padding: 15px;
+    border: 1px solid transparent;
+    border-radius: $radius-bar;
+}
+
+/* Opened, nothing typed: the pill on its own capsule. */
+.ms-capsule.ms-lone {
+    padding: 17px 19px;
+    border-radius: $radius-full;
+}
+
+.ms-column {
+    spacing: 0;
+}
+
+.ms-field {
+    height: $size-search;
+    padding: 0 12px 0 18px;
+    spacing: 10px;
+    border-radius: $radius-search;
+}
+
+.ms-lone .ms-field {
+    height: 64px;
+    padding: 0 16px 0 24px;
+    spacing: 14px;
+    border-radius: $radius-full;
+}
+
+.ms-field-icon {
+    icon-size: $size-icon-bar;
+}
+
+.ms-lone .ms-field-icon {
+    icon-size: 24px;
+}
+
+.ms-hint {
+    padding-left: 10px;
+}
+
+.ms-entry {
+    padding: 0;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background-color: transparent;
+    min-height: 30px;
+}
+
+.ms-lone .ms-entry {
+    min-height: 34px;
+}
+
+.ms-kbd {
+    padding: 5px 10px;
+    border-radius: $radius-full;
+}
+
+.ms-body {
+    padding-top: $space-card-gap;
+    spacing: $space-card-gap;
+}
+
+.ms-results {
+    padding: 0;
+}
+
+.ms-scroll {
+    max-height: 520px;
+}
+
+
+/* Group headings, in the serif: 32 above, 8 below, 12 in. */
+.ms-section {
+    padding: 32px 0 8px 12px;
+}
+
+.ms-section-first {
+    padding-top: 0;
+}
+
+.ms-group {
+    spacing: 4px;
+}
+
+.ms-row {
+    height: 52px;
+    padding: 0 14px 0 6px;
+    border-radius: $radius-card;
+    transition-duration: 120ms;
+}
+
+.ms-row-small {
+    height: 48px;
+    padding-left: 0;
+}
+
+.ms-row-sheet {
+    padding-left: 4px;
+}
+
+.ms-row-box {
+    spacing: 14px;
+}
+
+.ms-row-sheet .ms-row-box {
+    spacing: 12px;
+}
+
+.ms-tophit-box {
+    spacing: 14px;
+}
+
+.ms-text {
+    spacing: 0;
+}
+
+.ms-badge {
+    border-radius: $radius-full;
+}
+
+.ms-tophit {
+    padding: $space-card;
+    border-radius: $radius-card;
+    transition-duration: 120ms;
+}
+
+/* The one black thing: the main button. */
+.ms-button {
+    height: 44px;
+    padding: 0 20px;
+    border-radius: $radius-full;
+    transition-duration: 120ms;
+}
+
+.ms-tophit .ms-button {
+    height: 40px;
+    padding: 0 16px;
+}
+
+.ms-button-box {
+    spacing: 8px;
+}
+
+.ms-button-icon {
+    icon-size: 20px;
+}
+
+/* The answer of a sum: the number is the card. */
+.ms-answer {
+    margin-top: 0;
+    padding: $space-card $space-card $space-card-bottom;
+    border-radius: $radius-card;
+}
+
+.ms-answer-box {
+    spacing: 20px;
+}
+
+.ms-answer-number {
+    spacing: 8px;
+}
+
+.ms-answer-meta {
+    spacing: 0;
+}
+
+.ms-aside {
+    padding: 0;
+}
+
+.ms-calm {
+    padding: 0 12px;
+    spacing: 8px;
+}
+
+.ms-fallback {
+    padding-top: $space-card-gap;
+}
+
+.ms-preview {
+    width: 280px;
+    padding: $space-card $space-card $space-card-bottom;
+    spacing: 0;
+    border-radius: $radius-card;
+}
+
+.ms-preview-name {
+    padding-top: $space-statement;
+}
+
+.ms-preview-kind {
+    padding-top: $space-label;
+}
+
+.ms-buttons {
+    padding-top: 16px;
+    spacing: 8px;
+}
+
+.ms-preview-list {
+    padding-top: 8px;
+    spacing: 0;
+}
+
+.ms-preview-list .ms-section {
+    padding: 24px 0 8px 0;
+}
+
+.ms-thumb {
+    border-radius: $radius-card;
+    background-size: cover;
+}
+
+.ms-foot {
+    padding: 20px 12px 4px;
+    spacing: 20px;
+}
+
+.ms-keys {
+    spacing: 20px;
+}
+
+.ms-sheet {
+    width: 280px;
+    padding: $space-card $space-card $space-card-bottom;
+    spacing: 0;
+    border-radius: $radius-card;
+}
+
+.ms-sheet-head {
+    padding: 0 0 $space-block 4px;
+}
+
+/* themed */
+
+.ms-root #trough {
+    background-color: transparent;
+}
+
+.ms-root .vhandle {
+    background-color: $ink3;
+    border-radius: $radius-full;
+    margin: 4px 5px;
+}
+
+
+.ms-root .ms-capsule {
+    background-color: $bar;
+    color: $ink;
+    border-color: $bar-rim;
+    box-shadow: 0 30px 60px -8px rgba(0, 0, 0, 0.22);
+}
+
+.ms-root-dark .ms-capsule {
+    box-shadow: 0 30px 60px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* Off by default: the capsule at 78 %, everything inside it stays solid. */
+.ms-root .ms-capsule.ms-see-through {
+    background-color: $bar@78;
+}
+
+.ms-root .ms-field {
+    background-color: $fill;
+    color: $ink;
+}
+
+.ms-root .ms-field-icon,
+.ms-root .ms-muted {
+    color: $ink2;
+}
+
+.ms-root .ms-entry {
+    color: $ink;
+    caret-color: $ink;
+    selection-background-color: $ink@20;
+    selected-color: $ink;
+}
+
+.ms-root .ms-entry .hint-text,
+.ms-root .ms-hint {
+    color: $ink2;
+}
+
+.ms-root .ms-kbd {
+    background-color: $bar;
+    color: $ink2;
+}
+
+.ms-root .ms-section {
+    color: $ink;
+}
+
+.ms-root .ms-row {
+    background-color: transparent;
+    color: $ink;
+}
+
+.ms-root .ms-row:hover {
+    background-color: $bar+fill@50;
+}
+
+.ms-root .ms-row.ms-selected {
+    background-color: $fill;
+}
+
+.ms-root .ms-badge {
+    background-color: $card;
+}
+
+.ms-root .ms-row.ms-selected .ms-badge {
+    background-color: $bar;
+}
+
+.ms-root .ms-badge-icon {
+    color: $ink;
+}
+
+.ms-root .ms-tophit .ms-badge,
+.ms-root .ms-hero,
+.ms-root .ms-preview-list .ms-badge,
+.ms-root .ms-sheet .ms-badge {
+    background-color: $fill;
+}
+
+.ms-root .ms-sheet .ms-row.ms-selected .ms-badge {
+    background-color: $card;
+}
+
+.ms-root .ms-tophit,
+.ms-root .ms-answer,
+.ms-root .ms-preview,
+.ms-root .ms-sheet {
+    background-color: $card;
+    color: $ink;
+}
+
+.ms-root .ms-tophit:hover,
+.ms-root .ms-tophit.ms-selected {
+    background-color: $card+ink@4;
+}
+
+.ms-root .ms-answer.ms-selected {
+    background-color: $card+ink@4;
+}
+
+.ms-root .ms-button {
+    background-color: $solid;
+    color: $on-solid;
+}
+
+.ms-root .ms-button:hover {
+    background-color: $solid+on-solid@12;
+}
+
+.ms-root .ms-button-tonal {
+    background-color: $fill;
+    color: $ink;
+}
+
+.ms-root .ms-button-tonal:hover {
+    background-color: $fill+ink@8;
+}
+
+.ms-root .ms-error {
+    color: $down;
+}

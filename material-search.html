@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Material Search</title>
+<style>
+/* Design reference only. No search logic. Values are copied from
+   insights-mono/tokens.json (light and dark). The extension in extension/
+   is built after it; tools/headless/scripts/gallery.js renders the real
+   panel in the same states. */
+@font-face { font-family: "Inter"; src: url("insights-mono/fonts/InterVariable.ttf") format("truetype"); font-weight: 100 900; }
+@font-face { font-family: "Geist Serif"; src: url("insights-mono/fonts/GeistSerif-Regular.ttf") format("truetype"); font-weight: 400; }
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --card: #f4f4f6; --fill: #e6e6ea; --line: #e0e0e4;
+  --ink: #0c0c0e; --ink2: #5e5e64; --ink3: #a3a3a8;
+  --solid: #0c0c0e; --on-solid: #ffffff;
+  --bar: #ffffff; --rim: rgba(0,0,0,0.08);
+  --down: #ba1a1a;
+  --shadow-bar: 0 14px 24px -4px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  --shadow-panel: 0 30px 60px -8px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.08);
+  --desk: #d9d9de;
+  --space-gutter: 16px; --space-card: 18px; --space-card-bottom: 20px; --space-card-gap: 28px;
+  --space-statement: 12px; --space-block: 14px; --space-icon: 7px; --space-label: 4px;
+  --radius-card: 22px; --radius-search: 26px; --radius-bar: 30px;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000000; --card: #161618; --fill: #26262a; --line: #2c2c30;
+  --ink: #f5f5f7; --ink2: #a1a1a6; --ink3: #636366;
+  --solid: #f5f5f7; --on-solid: #000000;
+  --bar: #1c1c1e; --rim: rgba(255,255,255,0.12);
+  --down: #ff8a80;
+  --shadow-bar: 0 14px 24px -4px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-panel: 0 30px 60px -8px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.3);
+  --desk: #0b0b0d;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--desk); }
+body {
+  margin: 0; padding: 0 0 96px; color: var(--ink);
+  font: 400 15px/21px Inter, system-ui, sans-serif; font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+svg.i { width: 22px; height: 22px; fill: currentColor; flex: none; }
+button { font: inherit; color: inherit; }
+
+.topbar { height: 32px; display: flex; align-items: center; justify-content: center; font: 600 13px/18px Inter, sans-serif; background: #000; color: #fff; }
+.toggle { position: fixed; top: 44px; right: 16px; z-index: 5; height: 44px; padding: 0 18px; border: 0; border-radius: 9999px; background: var(--bar); color: var(--ink); font: 600 14px/19px Inter, sans-serif; box-shadow: var(--shadow-bar), inset 0 0 0 0.8px var(--rim); cursor: pointer; }
+main { display: flex; flex-direction: column; align-items: center; padding: 48px 16px 0; }
+.caption { width: 760px; max-width: 100%; margin: 72px 0 16px; font: 500 13px/18px Inter, sans-serif; color: var(--ink2); }
+.caption:first-child { margin-top: 0; }
+
+/* ---- Panel: a floating capsule. Cards are flat inside it. ---- */
+.panel, .lone { width: 760px; max-width: 100%; background: var(--bar); color: var(--ink); box-shadow: var(--shadow-panel), inset 0 0 0 0.8px var(--rim); }
+.panel { padding: 16px; border-radius: var(--radius-bar); }
+.panel.compact { width: 560px; }
+.lone { padding: 16px; border-radius: 9999px; }
+
+.field { height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 18px; border-radius: var(--radius-search); background: var(--fill); }
+.field .i { color: var(--ink2); }
+.serif { font-family: "Geist Serif", Georgia, serif; font-weight: 400; }
+.query { flex: 1; font: 400 24px/30px "Geist Serif", Georgia, serif; letter-spacing: -0.24px; white-space: nowrap; }
+.query.placeholder { color: var(--ink2); }
+.lone { padding: 18px 20px; }
+.lone .field { height: 64px; padding: 0 16px 0 24px; gap: 14px; }
+.lone .query { font-size: 28px; line-height: 34px; letter-spacing: -0.28px; }
+.lone .field .i { width: 24px; height: 24px; }
+.lone .caret { height: 30px; vertical-align: -6px; }
+.caret { display: inline-block; width: 2px; height: 26px; margin: 0 2px 0 1px; vertical-align: -4px; background: var(--ink); }
+.placeholder .caret { margin: 0 8px 0 0; }
+.kbd { height: 26px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: 9999px; background: var(--bar); color: var(--ink2); font: 600 12px/16px Inter, sans-serif; }
+
+.body { display: flex; gap: var(--space-card-gap); padding-top: var(--space-card-gap); }
+.results { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.section { margin: 32px 0 8px 12px; font: 400 20px/26px "Geist Serif", Georgia, serif; letter-spacing: -0.2px; color: var(--ink); }
+.results > .section:first-child { margin-top: 0; }
+
+.tophit { display: flex; align-items: center; gap: 14px; padding: var(--space-card); padding-bottom: var(--space-card); border-radius: var(--radius-card); background: var(--card); }
+.tophit .text { flex: 1; min-width: 0; }
+.tophit .title { font: 600 17px/22px Inter, sans-serif; letter-spacing: -0.17px; }
+.row { display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 14px 0 6px; border-radius: var(--radius-card); }
+.row + .row { margin-top: 4px; }
+.row.sel { background: var(--fill); }
+.text { min-width: 0; }
+.title { font: 400 15px/21px Inter, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title b { font-weight: 800; }
+.sub { font: 400 13px/18px Inter, sans-serif; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .text { flex: 1; }
+.trail { font: 500 13px/18px Inter, sans-serif; color: var(--ink2); }
+
+.badge { width: 40px; height: 40px; border-radius: 9999px; display: grid; place-items: center; flex: none; background: var(--card); color: var(--ink); font: 600 16px/1 Inter, sans-serif; }
+.row.sel .badge { background: var(--bar); }
+.tophit .badge { width: 48px; height: 48px; background: var(--fill); }
+.badge .i { width: 20px; height: 20px; }
+
+.btn { height: 44px; padding: 0 20px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 9999px; background: var(--solid); color: var(--on-solid); font: 600 14px/18px Inter, sans-serif; cursor: pointer; }
+.btn .i { width: 20px; height: 20px; }
+.btn.tonal { background: var(--fill); color: var(--ink); }
+.tophit .btn { height: 40px; padding: 0 16px; }
+
+.preview { width: 280px; flex: none; align-self: flex-start; padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.hero { width: 72px; height: 72px; border-radius: 9999px; background: var(--fill); display: grid; place-items: center; font: 600 30px/1 Inter, sans-serif; }
+.p-name { margin-top: var(--space-statement); font: 400 30px/34px "Geist Serif", Georgia, serif; letter-spacing: -0.3px; text-wrap: balance; }
+.p-kind { margin-top: var(--space-label); font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.btns { margin-top: 16px; display: flex; gap: 8px; }
+.p-list { width: 100%; margin-top: 8px; text-align: left; }
+.p-list .section { margin-left: 0; font-size: 18px; line-height: 24px; }
+.p-list .row { height: 48px; padding-left: 0; }
+.p-list .badge { background: var(--fill); }
+
+.foot { display: flex; justify-content: space-between; padding: 20px 12px 4px; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.keys { display: flex; gap: 20px; }
+
+/* ---- Sum, units, nothing found ---- */
+.answer { margin-top: var(--space-card-gap); padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); display: flex; align-items: center; gap: 20px; }
+.answer .big { font: 600 64px/72px Inter, sans-serif; letter-spacing: -1.28px; }
+.answer .big small { font: 500 14px/18px Inter, sans-serif; letter-spacing: 0; color: var(--ink2); margin-left: 8px; }
+.answer .meta { margin-left: auto; text-align: right; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.answer .meta b { display: block; font: 600 14px/18px Inter, sans-serif; color: var(--ink); }
+.calm { margin: var(--space-card-gap) 12px 0; font: 400 26px/32px "Geist Serif", Georgia, serif; letter-spacing: -0.264px; }
+.calm-sub { margin: 8px 12px 0; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.single { margin-top: var(--space-card-gap); }
+
+/* ---- Actions sheet: takes the place of the preview ---- */
+.sheet { width: 280px; flex: none; align-self: flex-start; padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); }
+.sheet h3 { margin: 0 0 var(--space-block) 4px; font: 400 26px/32px "Geist Serif", Georgia, serif; letter-spacing: -0.26px; }
+.sheet .row { padding-left: 4px; gap: 12px; }
+.sheet .row.sel { background: var(--fill); }
+.sheet .badge { width: 32px; height: 32px; background: var(--fill); }
+.sheet .row.sel .badge { background: var(--card); }
+.sheet .trail { margin-left: auto; }
+
+/* ---- Settings window ---- */
+.window { width: 640px; max-width: 100%; padding: 28px 28px 32px; border-radius: var(--radius-bar); background: var(--bg); color: var(--ink); box-shadow: var(--shadow-panel), inset 0 0 0 0.8px var(--rim); }
+.window h2 { margin: 0 0 var(--space-card-gap); font: 400 38px/44px "Geist Serif", Georgia, serif; letter-spacing: -0.76px; }
+.window h4 { margin: var(--space-card-gap) 0 var(--space-block); font: 400 24px/30px "Geist Serif", Georgia, serif; letter-spacing: -0.24px; }
+.window h4:first-of-type { margin-top: 0; }
+.group { padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); display: flex; flex-direction: column; gap: var(--space-card); }
+.setting { display: flex; align-items: center; gap: 12px; }
+.setting .text { flex: 1; }
+.setting .title { white-space: normal; }
+.switch { width: 52px; height: 32px; padding: 4px; border-radius: 9999px; background: var(--fill); display: flex; }
+.switch::after { content: ""; width: 24px; height: 24px; border-radius: 9999px; background: var(--ink2); }
+.switch.on { background: var(--solid); justify-content: flex-end; }
+.switch.on::after { background: var(--on-solid); }
+.value { font: 600 14px/18px Inter, sans-serif; color: var(--ink2); }
+.shortcut { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 9999px; background: var(--fill); font: 600 14px/18px Inter, sans-serif; }
+.err { color: var(--down); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+<symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol>
+<symbol id="i-file" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></symbol>
+<symbol id="i-folder" viewBox="0 0 24 24"><path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></symbol>
+<symbol id="i-tune" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z"/></symbol>
+<symbol id="i-globe" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></symbol>
+<symbol id="i-window" viewBox="0 0 24 24"><path d="M19 4H5c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.89-2-2-2zm0 14H5V8h14v10z"/></symbol>
+<symbol id="i-return" viewBox="0 0 24 24"><path d="M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z"/></symbol>
+<symbol id="i-open" viewBox="0 0 24 24"><path d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></symbol>
+<symbol id="i-power" viewBox="0 0 24 24"><path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42A6.92 6.92 0 0 1 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17A8.93 8.93 0 0 0 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></symbol>
+<symbol id="i-calc" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM6.25 7.72h5v1.5h-5v-1.5zM11.5 16h-2v2H8v-2H6v-1.5h2v-2h1.5v2h2V16zm6.5 1.25h-5v-1.5h5v1.5zm0-2.5h-5v-1.5h5v1.5zm-.03-5.28l-1.06 1.06-1.41-1.4-1.41 1.41-1.06-1.06 1.41-1.41-1.41-1.42L14.09 6l1.41 1.41L16.91 6l1.06 1.06-1.41 1.41 1.41 1.41z"/></symbol>
+  </defs>
+</svg>
+
+<div class="topbar">Thu 12 Nov 14:32</div>
+<button class="toggle" id="toggle" type="button">Switch to dark</button>
+
+<main>
+  <p class="caption">1. Opened, nothing typed. Only the pill, on its own capsule.</p>
+  <section class="lone" aria-label="Material Search, empty">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <div class="query placeholder"><span class="caret"></span>Search anything</div>
+      <span class="kbd">Esc</span>
+    </div>
+  </section>
+
+  <p class="caption">2. Typing “fire”. Top hit, groups, preview. The one black thing is the main button.</p>
+  <section class="panel" aria-label="Material Search">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <div class="query">fire<span class="caret"></span></div>
+      <span class="kbd">Esc</span>
+    </div>
+    <div class="body">
+      <div class="results">
+        <div class="tophit">
+          <div class="badge">F</div>
+          <div class="text"><div class="title"><b>Fire</b>fox</div><div class="sub">App · 3 windows open</div></div>
+          <button class="btn" type="button"><svg class="i"><use href="#i-return"/></svg>Open</button>
+        </div>
+        <div class="section">Apps</div>
+        <div class="row sel"><div class="badge">F</div><div class="text"><div class="title"><b>Fire</b>wall</div><div class="sub">System settings tool</div></div><span class="trail">App</span></div>
+        <div class="row"><div class="badge">C</div><div class="text"><div class="title">Camp<b>fire</b> notes</div><div class="sub">Flatpak</div></div><span class="trail">App</span></div>
+        <div class="section">Files</div>
+        <div class="row"><div class="badge"><svg class="i"><use href="#i-file"/></svg></div><div class="text"><div class="title"><b>fire</b>wall-rules.md</div><div class="sub">~/git/ember/docs · edited yesterday</div></div><span class="trail">4 KB</span></div>
+        <div class="row"><div class="badge"><svg class="i"><use href="#i-image"/></svg></div><div class="text"><div class="title">camp<b>fire</b>-2026.jpg</div><div class="sub">~/Pictures/Summer · 14 Aug</div></div><span class="trail">3.2 MB</span></div>
+        <div class="section">Settings</div>
+        <div class="row"><div class="badge"><svg class="i"><use href="#i-tune"/></svg></div><div class="text"><div class="title"><b>Fire</b>wall and network</div><div class="sub">Settings · Network</div></div></div>
+      </div>
+      <aside class="preview">
+        <div class="hero">F</div>
+        <div class="p-name">Firefox</div>
+        <div class="p-kind">Web browser · used 41 times this week</div>
+        <div class="btns"><button class="btn" type="button"><svg class="i"><use href="#i-open"/></svg>Open</button><button class="btn tonal" type="button">New window</button></div>
+        <div class="p-list">
+          <div class="section">Open windows</div>
+          <div class="row"><div class="badge"><svg class="i"><use href="#i-window"/></svg></div><div class="text"><div class="title">GNOME Shell extensions guide</div><div class="sub">Workspace 1</div></div></div>
+          <div class="row"><div class="badge"><svg class="i"><use href="#i-window"/></svg></div><div class="text"><div class="title">Insights Mono</div><div class="sub">Workspace 2</div></div></div>
+        </div>
+      </aside>
+    </div>
+    <div class="foot"><div class="keys"><span>Enter to open</span><span>Tab for actions</span><span>Ctrl+Enter to show in folder</span></div><span>6 results in 4 ms</span></div>
+  </section>
+
+  <p class="caption">3. Tab: the actions of the selected row take the place of the preview. Esc or Tab goes back.</p>
+  <section class="panel" aria-label="Material Search, actions">
+    <div class="field"><svg class="i"><use href="#i-search"/></svg><div class="query">fire<span class="caret"></span></div><span class="kbd">Esc</span></div>
+    <div class="body">
+      <div class="results">
+        <div class="tophit"><div class="badge">F</div><div class="text"><div class="title"><b>Fire</b>fox</div><div class="sub">App · 3 windows open</div></div><button class="btn" type="button"><svg class="i"><use href="#i-return"/></svg>Open</button></div>
+        <div class="section">Apps</div>
+        <div class="row"><div class="badge">F</div><div class="text"><div class="title"><b>Fire</b>wall</div><div class="sub">System settings tool</div></div><span class="trail">App</span></div>
+        <div class="row"><div class="badge">C</div><div class="text"><div class="title">Camp<b>fire</b> notes</div><div class="sub">Flatpak</div></div><span class="trail">App</span></div>
+      </div>
+      <aside class="sheet">
+        <h3>Actions</h3>
+        <div class="row sel"><div class="badge"><svg class="i"><use href="#i-open"/></svg></div><div class="text"><div class="title">Open</div></div><span class="trail">Enter</span></div>
+        <div class="row"><div class="badge"><svg class="i"><use href="#i-window"/></svg></div><div class="text"><div class="title">New window</div></div><span class="trail">Ctrl+N</span></div>
+        <div class="row"><div class="badge"><svg class="i"><use href="#i-power"/></svg></div><div class="text"><div class="title">Quit</div></div><span class="trail">Ctrl+Q</span></div>
+      </aside>
+    </div>
+    <div class="foot"><div class="keys"><span>Enter to run</span><span>Esc to go back</span></div><span></span></div>
+  </section>
+
+  <p class="caption">4. A sum. The answer is the number; the label says where it was worked out.</p>
+  <section class="panel" aria-label="Material Search, sum">
+    <div class="field"><svg class="i"><use href="#i-search"/></svg><div class="query">128 * 1.2<span class="caret"></span></div><span class="kbd">Esc</span></div>
+    <div class="answer">
+      <div class="big">153.6</div>
+      <div class="meta"><b>Enter copies</b>Worked out on this computer.</div>
+    </div>
+    <div class="foot"><div class="keys"><span>Enter to copy</span></div><span>1 result in 1 ms</span></div>
+  </section>
+
+  <p class="caption">5. A unit conversion.</p>
+  <section class="panel" aria-label="Material Search, units">
+    <div class="field"><svg class="i"><use href="#i-search"/></svg><div class="query">10 km in mi<span class="caret"></span></div><span class="kbd">Esc</span></div>
+    <div class="answer">
+      <div class="big">6.21<small>mi</small></div>
+      <div class="meta"><b>Enter copies</b>10 km, worked out on this computer.</div>
+    </div>
+    <div class="foot"><div class="keys"><span>Enter to copy</span></div><span>1 result in 1 ms</span></div>
+  </section>
+
+  <p class="caption">6. Nothing found. One calm sentence in the serif, then the two ways on.</p>
+  <section class="panel" aria-label="Material Search, nothing found">
+    <div class="field"><svg class="i"><use href="#i-search"/></svg><div class="query">zqxv<span class="caret"></span></div><span class="kbd">Esc</span></div>
+    <p class="calm">Nothing found for “zqxv”.</p>
+    <p class="calm-sub">Not in apps, windows, settings or file names.</p>
+    <div class="single">
+      <div class="row sel"><div class="badge"><svg class="i"><use href="#i-globe"/></svg></div><div class="text"><div class="title">Search the web for “zqxv”</div><div class="sub">Opens your browser</div></div><span class="trail">Enter</span></div>
+      <div class="row"><div class="badge"><svg class="i"><use href="#i-search"/></svg></div><div class="text"><div class="title">Search in Files</div><div class="sub">Looks inside documents, slower</div></div></div>
+    </div>
+    <div class="foot"><div class="keys"><span>Enter to search</span></div><span></span></div>
+  </section>
+
+  <p class="caption">7. Compact (below 1400 px): no preview.</p>
+  <section class="panel compact" aria-label="Material Search, compact">
+    <div class="field"><svg class="i"><use href="#i-search"/></svg><div class="query">fire<span class="caret"></span></div><span class="kbd">Esc</span></div>
+    <div class="body" style="display:block">
+      <div class="results">
+        <div class="tophit"><div class="badge">F</div><div class="text"><div class="title"><b>Fire</b>fox</div><div class="sub">App · 3 windows open</div></div><button class="btn" type="button"><svg class="i"><use href="#i-return"/></svg>Open</button></div>
+        <div class="section">Apps</div>
+        <div class="row sel"><div class="badge">F</div><div class="text"><div class="title"><b>Fire</b>wall</div><div class="sub">System settings tool</div></div><span class="trail">App</span></div>
+        <div class="section">Files</div>
+        <div class="row"><div class="badge"><svg class="i"><use href="#i-file"/></svg></div><div class="text"><div class="title"><b>fire</b>wall-rules.md</div><div class="sub">~/git/ember/docs</div></div><span class="trail">4 KB</span></div>
+      </div>
+    </div>
+    <div class="foot"><div class="keys"><span>Enter to open</span><span>Tab for actions</span></div><span>4 results in 3 ms</span></div>
+  </section>
+
+  <p class="caption">8. Settings. A serif title, cards 28 px apart, black for what is on.</p>
+  <section class="window" aria-label="Material Search settings">
+    <h2>Material Search</h2>
+    <h4>General</h4>
+    <div class="group">
+      <div class="setting"><div class="text"><div class="title">Shortcut</div><div class="sub">Opens the launcher</div></div><span class="shortcut">Ctrl + Space</span></div>
+      <div class="setting"><div class="text"><div class="title">Compact mode</div><div class="sub">By screen size</div></div><span class="value">Automatic</span></div>
+      <div class="setting"><div class="text"><div class="title">See-through</div><div class="sub">Lets the windows show through the panel.</div></div><span class="switch"></span></div>
+    </div>
+    <h4>Sources</h4>
+    <div class="group">
+      <div class="setting"><div class="text"><div class="title">Files by name</div><div class="sub">Asked after two characters</div></div><span class="switch on"></span></div>
+      <div class="setting"><div class="text"><div class="title">Other apps’ results</div><div class="sub">Off for every provider until you turn it on.</div></div><span class="switch"></span></div>
+    </div>
+    <h4>Privacy</h4>
+    <div class="group">
+      <div class="setting"><div class="text"><div class="title">Remember what you open</div><div class="sub">Use counts stay on this computer.</div></div><span class="switch on"></span></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  const root = document.documentElement;
+  const button = document.getElementById('toggle');
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  function apply(theme) { root.dataset.theme = theme; button.textContent = theme === 'dark' ? 'Switch to light' : 'Switch to dark'; }
+  apply(new URLSearchParams(location.search).get('theme') || (dark ? 'dark' : 'light'));
+  button.addEventListener('click', () => apply(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+</script>
+</body>
+</html>

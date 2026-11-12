@@ -1,0 +1,554 @@
+# German translation of Material Search.
+msgid ""
+msgstr ""
+"Project-Id-Version: material-search\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-12 19:52+0100\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: extension/extension.js:147
+msgid "Material Search opens with Ctrl+Space"
+msgstr "Material Search öffnet mit Strg+Leertaste"
+
+#: extension/extension.js:148
+msgid ""
+"Super+Space switches input sources. Take it for the launcher? "
+"Shift+Super+Space keeps switching input sources."
+msgstr ""
+"Super+Leertaste wechselt die Eingabequelle. Für den Launcher übernehmen? "
+"Umschalt+Super+Leertaste wechselt weiterhin die Eingabequelle."
+
+#: extension/extension.js:151
+msgid "Use Super+Space"
+msgstr "Super+Leertaste nehmen"
+
+#: extension/extension.js:155
+msgid "Keep Ctrl+Space"
+msgstr "Strg+Leertaste behalten"
+
+#: extension/prefs.js:27 extension/sources/apps.js:45
+msgid "Apps"
+msgstr "Apps"
+
+#: extension/prefs.js:27
+msgid "Installed apps, by name, kind and keywords."
+msgstr "Installierte Apps, nach Name, Art und Stichwörtern."
+
+#: extension/prefs.js:28 extension/sources/windows.js:21
+msgid "Windows"
+msgstr "Fenster"
+
+#: extension/prefs.js:28
+msgid "Open windows, by title."
+msgstr "Offene Fenster, nach Titel."
+
+#: extension/prefs.js:29 extension/sources/settings.js:17
+#: extension/sources/settings.js:66 extension/sources/settings.js:76
+msgid "Settings"
+msgstr "Einstellungen"
+
+#: extension/prefs.js:29
+msgid "The panels of GNOME Settings."
+msgstr "Die Seiten der GNOME-Einstellungen."
+
+#: extension/prefs.js:30
+msgid "System actions"
+msgstr "Systemaktionen"
+
+#: extension/prefs.js:30
+msgid ""
+"Lock, log out, suspend, restart, power off. The last three ask in GNOME’s "
+"own dialog."
+msgstr ""
+"Sperren, Abmelden, Bereitschaft, Neustart, Ausschalten. Die letzten drei "
+"fragen in GNOMEs eigenem Dialog."
+
+#: extension/prefs.js:31
+msgid "Calculator and units"
+msgstr "Rechner und Einheiten"
+
+#: extension/prefs.js:31
+msgid "Sums and conversions, worked out on this computer."
+msgstr "Rechnungen und Umrechnungen, auf diesem Rechner ausgerechnet."
+
+#: extension/prefs.js:32
+msgid "Files by name"
+msgstr "Dateien nach Name"
+
+#: extension/prefs.js:32
+msgid "From LocalSearch, after two letters and a short pause."
+msgstr "Aus LocalSearch, ab zwei Buchstaben und einer kurzen Pause."
+
+#: extension/prefs.js:117 extension/prefs.js:146
+msgid "Shortcut"
+msgstr "Tastenkürzel"
+
+#: extension/prefs.js:118
+msgid "Press the keys"
+msgstr "Tasten drücken"
+
+#: extension/prefs.js:118
+msgid "Escape leaves it as it is."
+msgstr "Escape lässt es, wie es ist."
+
+#: extension/prefs.js:137
+msgid "General"
+msgstr "Allgemein"
+
+#: extension/prefs.js:145
+msgid "Opening"
+msgstr "Öffnen"
+
+#: extension/prefs.js:147
+msgid "None"
+msgstr "Keines"
+
+#: extension/prefs.js:148
+msgid "Change"
+msgstr "Ändern"
+
+#: extension/prefs.js:156
+msgid "Super+Space"
+msgstr "Super+Leertaste"
+
+#: extension/prefs.js:183
+#, javascript-format
+msgid "Taken by GNOME as well (%s). Choose another, or free it there."
+msgstr "Auch von GNOME belegt (%s). Ein anderes wählen oder es dort freigeben."
+
+#: extension/prefs.js:184
+msgid "Opens and closes the launcher."
+msgstr "Öffnet und schließt den Launcher."
+
+#: extension/prefs.js:188
+msgid "Taken from the input source switch; Shift+Super+Space still switches."
+msgstr ""
+"Vom Wechsel der Eingabequelle übernommen; Umschalt+Super+Leertaste wechselt "
+"weiterhin."
+
+#: extension/prefs.js:189
+msgid "Give back"
+msgstr "Zurückgeben"
+
+#: extension/prefs.js:192
+msgid ""
+"Switches input sources now. Take it for the launcher; Shift+Super+Space "
+"keeps switching."
+msgstr ""
+"Wechselt jetzt die Eingabequelle. Für den Launcher übernehmen; "
+"Umschalt+Super+Leertaste wechselt weiterhin."
+
+#: extension/prefs.js:193
+msgid "Take"
+msgstr "Übernehmen"
+
+#: extension/prefs.js:205
+msgid "Look"
+msgstr "Aussehen"
+
+#: extension/prefs.js:207
+msgid "Preview column"
+msgstr "Vorschau-Spalte"
+
+#: extension/prefs.js:208
+msgid "Beside the results, for the selected one."
+msgstr "Neben den Ergebnissen, für das ausgewählte."
+
+#: extension/prefs.js:209
+msgid "On wide screens"
+msgstr "Auf breiten Bildschirmen"
+
+#: extension/prefs.js:209
+msgid "Always"
+msgstr "Immer"
+
+#: extension/prefs.js:209
+msgid "Never"
+msgstr "Nie"
+
+#: extension/prefs.js:214
+msgid "See-through"
+msgstr "Durchsichtig"
+
+#: extension/prefs.js:214
+msgid "Lets the windows show through the panel."
+msgstr "Lässt die Fenster durch das Panel scheinen."
+
+#: extension/prefs.js:219 extension/prefs.js:220
+msgid "Motion"
+msgstr "Bewegung"
+
+#: extension/prefs.js:220
+msgid ""
+"The pill scales in, the panel grows. Follows GNOME’s animation setting too."
+msgstr ""
+"Die Pille wächst hinein, das Panel wächst auf. Folgt auch GNOMEs Animations-"
+"Einstellung."
+
+#: extension/prefs.js:222
+msgid "Calm on battery"
+msgstr "Ruhig im Akkubetrieb"
+
+#: extension/prefs.js:222
+msgid "On battery the panel simply appears."
+msgstr "Im Akkubetrieb erscheint das Panel einfach."
+
+#: extension/prefs.js:231
+msgid "Sources"
+msgstr "Quellen"
+
+#: extension/prefs.js:232
+msgid "What is searched"
+msgstr "Was durchsucht wird"
+
+#: extension/prefs.js:232
+msgid "Everything stays on this computer."
+msgstr "Alles bleibt auf diesem Rechner."
+
+#: extension/prefs.js:252
+msgid "Other apps"
+msgstr "Andere Apps"
+
+#: extension/prefs.js:253
+msgid ""
+"Apps that offer GNOME their own search. Each one is asked over D-Bus after "
+"the fast results, and left out when it takes longer than 300 ms."
+msgstr ""
+"Apps, die GNOME eine eigene Suche anbieten. Jede wird nach den schnellen "
+"Ergebnissen über D-Bus gefragt und weggelassen, wenn sie länger als 300 ms "
+"braucht."
+
+#: extension/prefs.js:257
+msgid "No app here offers a search."
+msgstr "Keine App hier bietet eine Suche an."
+
+#: extension/prefs.js:272
+msgid "The web"
+msgstr "Das Web"
+
+#: extension/prefs.js:272
+msgid ""
+"Only when you choose “Search the web”: the text is handed to your browser."
+msgstr "Nur wenn du „Im Web suchen“ wählst: Der Text geht an deinen Browser."
+
+#: extension/prefs.js:274
+msgid "Search engine"
+msgstr "Suchmaschine"
+
+#: extension/prefs.js:275
+msgid "Other"
+msgstr "Andere"
+
+#: extension/prefs.js:278
+#, javascript-format
+msgid "Address, with %s for the search"
+msgstr "Adresse, mit %s für die Suche"
+
+#: extension/prefs.js:295
+msgid "Privacy"
+msgstr "Privatsphäre"
+
+#: extension/prefs.js:297
+msgid "Ranking"
+msgstr "Reihenfolge"
+
+#: extension/prefs.js:298
+msgid ""
+"What you open for what you typed is counted in ~/.local/share/material-"
+"search/usage.json, so it comes first next time. Counts fade over two weeks. "
+"Nothing leaves the computer."
+msgstr ""
+"Was du zu welcher Eingabe öffnest, wird in ~/.local/share/material-search/"
+"usage.json gezählt, damit es beim nächsten Mal zuerst kommt. Die Zählung "
+"verblasst über zwei Wochen. Nichts verlässt den Rechner."
+
+#: extension/prefs.js:300
+msgid "Rank by use"
+msgstr "Nach Nutzung ordnen"
+
+#: extension/prefs.js:302
+msgid "Forget what was opened"
+msgstr "Vergessen, was geöffnet wurde"
+
+#: extension/prefs.js:303
+msgid "Forget"
+msgstr "Vergessen"
+
+#: extension/prefs.js:306
+msgid "Forgotten."
+msgstr "Vergessen."
+
+#: extension/views/panel.js:100
+msgid "Search anything"
+msgstr "Alles suchen"
+
+#: extension/views/panel.js:106
+msgid "Esc"
+msgstr "Esc"
+
+#: extension/views/panel.js:126 extension/views/panel.js:463
+#: extension/sources/apps.js:153 extension/sources/apps.js:198
+#: extension/sources/files.js:257 extension/sources/files.js:297
+#: extension/sources/settings.js:78
+msgid "Open"
+msgstr "Öffnen"
+
+#: extension/views/panel.js:144 extension/sources/actions.js:34
+msgid "Actions"
+msgstr "Aktionen"
+
+#: extension/views/panel.js:433
+#, javascript-format
+msgid "Nothing here for “%s”"
+msgstr "Nichts hier für „%s“"
+
+#: extension/views/panel.js:434
+msgid "No app, file or setting has that name."
+msgstr "Keine App, Datei oder Einstellung heißt so."
+
+#: extension/views/panel.js:436
+msgid "Still looking through files…"
+msgstr "Durchsuche noch Dateien …"
+
+#: extension/views/panel.js:438
+msgid "Nothing inside documents either."
+msgstr "Auch in Dokumenten nichts."
+
+#: extension/views/panel.js:459
+msgid "Enter copies"
+msgstr "Enter kopiert"
+
+#: extension/views/panel.js:459
+msgid "Worked out on this computer."
+msgstr "Auf diesem Rechner ausgerechnet."
+
+#: extension/views/panel.js:501
+#, javascript-format
+msgid "Search the web for “%s”"
+msgstr "Im Web nach „%s“ suchen"
+
+#: extension/views/panel.js:503
+#, javascript-format
+msgid "Opens in %s"
+msgstr "Öffnet in %s"
+
+#: extension/views/panel.js:504
+msgid "Enter"
+msgstr "Enter"
+
+#: extension/views/panel.js:514
+msgid "Search in Files"
+msgstr "In Dateien suchen"
+
+#: extension/views/panel.js:516
+msgid "Looks inside documents, slower"
+msgstr "Sucht in Dokumenten, langsamer"
+
+#: extension/views/panel.js:539
+msgid "Enter to look inside documents"
+msgstr "Enter sucht in Dokumenten"
+
+#: extension/views/panel.js:539
+msgid "Enter to search the web"
+msgstr "Enter sucht im Web"
+
+#: extension/views/panel.js:541
+msgid "Enter to copy"
+msgstr "Enter zum Kopieren"
+
+#: extension/views/panel.js:541 extension/views/panel.js:543
+#: extension/views/panel.js:545
+msgid "Tab for actions"
+msgstr "Tab für Aktionen"
+
+#: extension/views/panel.js:543 extension/views/panel.js:545
+msgid "Enter to open"
+msgstr "Enter zum Öffnen"
+
+#: extension/views/panel.js:543
+msgid "Ctrl+Enter to show in folder"
+msgstr "Strg+Enter zeigt im Ordner"
+
+#: extension/views/panel.js:558
+#, javascript-format
+msgid "%d result in %d ms"
+msgid_plural "%d results in %d ms"
+msgstr[0] "%d Ergebnis in %d ms"
+msgstr[1] "%d Ergebnisse in %d ms"
+
+#: extension/views/panel.js:627
+msgid "Enter to run"
+msgstr "Enter führt aus"
+
+#: extension/views/panel.js:627
+msgid "Esc or Tab to go back"
+msgstr "Esc oder Tab geht zurück"
+
+#: extension/sources/actions.js:75
+msgid "System"
+msgstr "System"
+
+#: extension/sources/actions.js:85
+msgid "System action"
+msgstr "Systemaktion"
+
+#: extension/sources/apps.js:33 extension/sources/windows.js:64
+#, javascript-format
+msgid "Workspace %d"
+msgstr "Arbeitsfläche %d"
+
+#: extension/sources/apps.js:111 extension/sources/apps.js:130
+#: extension/sources/apps.js:194 extension/sources/calculator.js:88
+msgid "App"
+msgstr "App"
+
+#: extension/sources/apps.js:129
+#, javascript-format
+msgid "App · %d window open"
+msgid_plural "App · %d windows open"
+msgstr[0] "App · %d Fenster offen"
+msgstr[1] "App · %d Fenster offen"
+
+#: extension/sources/apps.js:156 extension/sources/apps.js:200
+msgid "New window"
+msgstr "Neues Fenster"
+
+#: extension/sources/apps.js:170
+msgid "Unpin from dash"
+msgstr "Vom Dash lösen"
+
+#: extension/sources/apps.js:172
+msgid "Pin to dash"
+msgstr "Ans Dash heften"
+
+#: extension/sources/apps.js:175
+msgid "Show details"
+msgstr "Details zeigen"
+
+#: extension/sources/apps.js:187
+msgid "Quit"
+msgstr "Beenden"
+
+#: extension/sources/apps.js:197
+#, javascript-format
+msgid "used %d time this week"
+msgid_plural "used %d times this week"
+msgstr[0] "diese Woche %d-mal benutzt"
+msgstr[1] "diese Woche %d-mal benutzt"
+
+#: extension/sources/apps.js:206
+msgid "Open windows"
+msgstr "Offene Fenster"
+
+#: extension/sources/calculator.js:25
+msgid "Answer"
+msgstr "Antwort"
+
+#: extension/sources/calculator.js:73
+#, javascript-format
+msgid "Copy %s"
+msgstr "%s kopieren"
+
+#: extension/sources/calculator.js:74
+msgid "Copy with the sum"
+msgstr "Mit Rechnung kopieren"
+
+#: extension/sources/calculator.js:85
+msgid "Also"
+msgstr "Außerdem"
+
+#: extension/sources/calculator.js:86
+msgid "Open in Calculator"
+msgstr "Im Taschenrechner öffnen"
+
+#: extension/sources/files.js:127
+msgid "Files"
+msgstr "Dateien"
+
+#: extension/sources/files.js:216
+msgid "In documents"
+msgstr "In Dokumenten"
+
+#: extension/sources/files.js:232
+msgid "edited today"
+msgstr "heute bearbeitet"
+
+#: extension/sources/files.js:232
+msgid "edited yesterday"
+msgstr "gestern bearbeitet"
+
+#: extension/sources/files.js:264
+#, javascript-format
+msgid "Open with %s"
+msgstr "Mit %s öffnen"
+
+#: extension/sources/files.js:270 extension/sources/files.js:298
+msgid "Show in folder"
+msgstr "Im Ordner zeigen"
+
+#: extension/sources/files.js:271
+msgid "Copy path"
+msgstr "Pfad kopieren"
+
+#: extension/sources/files.js:273
+msgid "Move to trash"
+msgstr "In den Papierkorb"
+
+#: extension/sources/files.js:290
+msgid "Edited today"
+msgstr "Heute bearbeitet"
+
+#: extension/sources/files.js:290
+msgid "Edited yesterday"
+msgstr "Gestern bearbeitet"
+
+#: extension/sources/providers.js:86
+#, javascript-format
+msgid "In %s"
+msgstr "In %s"
+
+#: extension/sources/providers.js:111
+#, javascript-format
+msgid "Search in %s"
+msgstr "In %s suchen"
+
+#: extension/sources/settings.js:66
+#, javascript-format
+msgid "Settings · %s"
+msgstr "Einstellungen · %s"
+
+#: extension/sources/settings.js:72
+msgid "Open in Settings"
+msgstr "In den Einstellungen öffnen"
+
+#: extension/sources/windows.js:72 extension/sources/windows.js:84
+msgid "Window"
+msgstr "Fenster"
+
+#: extension/sources/windows.js:86
+msgid "Switch"
+msgstr "Wechseln"
+
+#: extension/sources/windows.js:87
+msgid "Close"
+msgstr "Schließen"
+
+#: extension/sources/windows.js:99
+msgid "Switch to window"
+msgstr "Zum Fenster wechseln"
+
+#: extension/sources/windows.js:104
+msgid "Move to this workspace"
+msgstr "Auf diese Arbeitsfläche holen"
+
+#: extension/sources/windows.js:113
+msgid "Minimize"
+msgstr "Minimieren"
+
+#: extension/sources/windows.js:115
+msgid "Close window"
+msgstr "Fenster schließen"

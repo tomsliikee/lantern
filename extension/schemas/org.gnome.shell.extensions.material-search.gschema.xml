@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.material-search" path="/org/gnome/shell/extensions/material-search/">
+    <key name="toggle-shortcut" type="as">
+      <default><![CDATA[['<Super>space']]]></default>
+      <summary>Keys that open and close the launcher</summary>
+    </key>
+    <key name="shortcut-asked" type="b">
+      <default>false</default>
+      <summary>Whether the question about Super+Space was asked</summary>
+      <description>Asked once, on the first enable, when Super+Space also switches input sources.</description>
+    </key>
+    <key name="input-source-taken" type="as">
+      <default>[]</default>
+      <summary>Keys taken from the input source switch</summary>
+      <description>What was removed from org.gnome.desktop.wm.keybindings switch-input-source, so it can be given back.</description>
+    </key>
+    <key name="compact" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="always"/>
+        <choice value="never"/>
+      </choices>
+      <default>'auto'</default>
+      <summary>Leave out the preview column</summary>
+      <description>auto: on a screen narrower than 1400 logical pixels; always; never.</description>
+    </key>
+    <key name="see-through" type="b">
+      <default>false</default>
+      <summary>See-through</summary>
+      <description>Lets the windows show through the panel's outer surface, as in Halo. No blur.</description>
+    </key>
+    <key name="animations" type="b">
+      <default>true</default>
+      <summary>Motion</summary>
+      <description>The pill scaling in, the panel growing. Also follows GNOME's own animation setting.</description>
+    </key>
+    <key name="calm-on-battery" type="b">
+      <default>true</default>
+      <summary>No motion on battery</summary>
+    </key>
+    <key name="sources" type="as">
+      <default><![CDATA[['apps', 'windows', 'settings', 'actions', 'calculator', 'files']]]></default>
+      <summary>Switched-on sources</summary>
+    </key>
+    <key name="providers" type="as">
+      <default>[]</default>
+      <summary>Search providers of other apps that are asked</summary>
+      <description>Desktop ids. Each one is a D-Bus round trip into another app, so none is on by default.</description>
+    </key>
+    <key name="web-engine" type="s">
+      <choices>
+        <choice value="google"/>
+        <choice value="duckduckgo"/>
+        <choice value="startpage"/>
+        <choice value="ecosia"/>
+        <choice value="bing"/>
+        <choice value="custom"/>
+      </choices>
+      <default>'google'</default>
+      <summary>Search engine for "Search the web"</summary>
+    </key>
+    <key name="web-template" type="s">
+      <default>''</default>
+      <summary>Address of a custom search engine, with %s for the query</summary>
+    </key>
+    <key name="learn" type="b">
+      <default>true</default>
+      <summary>Rank by what was opened</summary>
+      <description>Counts what is opened for what was typed, in ~/.local/share/material-search/usage.json.</description>
+    </key>
+    <key name="forget-requested" type="x">
+      <default>0</default>
+      <summary>Set to the time to forget all use counts</summary>
+    </key>
+  </schema>
+</schemalist>

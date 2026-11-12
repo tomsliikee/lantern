@@ -1,0 +1,9 @@
+{
+    "uuid": "material-search@thomashaiden",
+    "name": "Material Search",
+    "description": "A launcher in the manner of Spotlight: one shortcut, one field, and the right app, window, file, setting or answer under the cursor. Insights Mono look.",
+    "shell-version": ["50"],
+    "settings-schema": "org.gnome.shell.extensions.material-search",
+    "gettext-domain": "material-search",
+    "url": "https://github.com/tomsliikee/lantern"
+}
