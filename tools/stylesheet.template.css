@@ -11,7 +11,7 @@
 
 /* The floating capsule. One static shadow, no blur behind it. */
 .ms-capsule {
-    padding: 15px;
+    padding: 18px;
     border: 1px solid transparent;
     border-radius: $radius-bar;
 }
@@ -72,12 +72,13 @@
 }
 
 .ms-body {
-    padding-top: $space-card-gap;
-    spacing: $space-card-gap;
+    padding-top: 40px;
+    spacing: 32px;
 }
 
+/* The right margin keeps the overlay scrollbar off the cards. */
 .ms-results {
-    padding: 0;
+    padding: 0 16px 0 0;
 }
 
 .ms-scroll {
@@ -85,9 +86,9 @@
 }
 
 
-/* Group headings, in the serif: 32 above, 8 below, 12 in. */
+/* Group headings, in the serif: 36 above, 10 below, 12 in. */
 .ms-section {
-    padding: 32px 0 8px 12px;
+    padding: 36px 0 10px 12px;
 }
 
 .ms-section-first {
@@ -95,14 +96,14 @@
 }
 
 .ms-group {
-    spacing: 4px;
+    spacing: 6px;
 }
 
 .ms-row {
     height: 52px;
     padding: 0 14px 0 6px;
     border-radius: $radius-card;
-    transition-duration: 120ms;
+    transition-duration: 160ms;
 }
 
 .ms-row-small {
@@ -137,7 +138,7 @@
 .ms-tophit {
     padding: $space-card;
     border-radius: $radius-card;
-    transition-duration: 120ms;
+    transition-duration: 160ms;
 }
 
 /* The one black thing: the main button. */
@@ -145,7 +146,7 @@
     height: 44px;
     padding: 0 20px;
     border-radius: $radius-full;
-    transition-duration: 120ms;
+    transition-duration: 160ms;
 }
 
 .ms-tophit .ms-button {
@@ -228,7 +229,7 @@
 }
 
 .ms-foot {
-    padding: 20px 12px 4px;
+    padding: 28px 12px 6px;
     spacing: 20px;
 }
 

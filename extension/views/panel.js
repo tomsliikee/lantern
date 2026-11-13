@@ -23,7 +23,7 @@ import {Search} from '../search.js';
 import {copy} from '../sources/calculator.js';
 import {launchContext} from '../sources/apps.js';
 import {icon} from './icons.js';
-import {GROW, OPEN, Spring, setMotionCheck} from './motion.js';
+import {ARRIVE, GROW, Spring, setMotionCheck} from './motion.js';
 import {AnswerCard, Group, TopHit} from './rows.js';
 import {ActionSheet, Preview} from './side.js';
 import {label, setText, styleEntry} from './text.js';
@@ -38,9 +38,14 @@ const TOP_SHARE = 0.18;
 const GROUPS = 8;
 const ROWS_PER_GROUP = 6;
 const PAGE = 5;
-const CLOSE_MS = 120;
-// The panel arrives at 96 % of its size.
-const OPEN_SCALE = 0.96;
+const CLOSE_MS = 160;
+// The panel arrives at 94 % of its size and leaves at 97 %.
+const OPEN_SCALE = 0.94;
+const CLOSE_SCALE = 0.97;
+// What grows in under the pill fades and rises into place.
+const REVEAL_MS = 240;
+const REVEAL_DELAY_MS = 70;
+const REVEAL_RISE = 10;
 
 const ENGINES = {
     google: 'https://www.google.com/search?q=%s',
@@ -182,10 +187,10 @@ export class Panel {
         this._openSpring = new Spring(this._capsule, value => {
             const scale = OPEN_SCALE + (1 - OPEN_SCALE) * value;
             this._capsule.set_scale(scale, scale);
-        }, OPEN, 0.02);
+        }, ARRIVE, 0.01);
         this._fadeSpring = new Spring(this._capsule, value => {
             this._capsule.opacity = Math.round(255 * Math.min(1, Math.max(0, value)));
-        }, SPRINGS.effect, 0.01);
+        }, SPRINGS.effectSlow, 0.01);
         setMotionCheck(() => this._motion());
         this._growSpring = new Spring(this._capsule, value => {
             this._capsule.height = Math.round(value);
@@ -317,8 +322,10 @@ export class Panel {
             this._closing = true;
             this._capsule.ease({
                 opacity: 0,
+                scale_x: CLOSE_SCALE,
+                scale_y: CLOSE_SCALE,
                 duration: CLOSE_MS,
-                mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+                mode: Clutter.AnimationMode.EASE_IN_OUT_CUBIC,
                 onStopped: () => {
                     if (this._closing)
                         this._finishClose();
@@ -332,6 +339,12 @@ export class Panel {
     _finishClose() {
         this._closing = false;
         this._capsule.remove_all_transitions();
+        this._body.remove_all_transitions();
+        this._foot.remove_all_transitions();
+        this._side.remove_all_transitions();
+        this._body.set({opacity: 255, translation_y: 0});
+        this._foot.opacity = 255;
+        this._side.opacity = 255;
         this._backdrop.hide();
         this._capsule.opacity = 255;
         this._capsule.set_scale(1, 1);
@@ -394,12 +407,32 @@ export class Panel {
         this._backdrop.queue_redraw();
         if (!animate || !this._motion())
             return;
+        if (!lone) {
+            this._reveal(this._body, REVEAL_RISE);
+            this._reveal(this._foot, 0, REVEAL_DELAY_MS + 60);
+        }
         // Only the height moves; the field stays where it is.
         const [, to] = this._capsule.get_preferred_height(this._width);
         this._growSpring.set(from);
         this._growSpring.to(to, () => {
             this._capsule.height = -1;
             this._backdrop.queue_redraw();
+        });
+    }
+
+    // Fades an actor in from nothing, rising into place, after a short wait
+    // so the capsule has grown under it by then.
+    _reveal(actor, rise = 0, delay = REVEAL_DELAY_MS) {
+        if (!this._motion())
+            return;
+        actor.remove_all_transitions();
+        actor.set({opacity: 0, translation_y: rise});
+        actor.ease({
+            opacity: 255,
+            translation_y: 0,
+            delay,
+            duration: REVEAL_MS,
+            mode: Clutter.AnimationMode.EASE_OUT_CUBIC,
         });
     }
 
@@ -575,8 +608,11 @@ export class Panel {
         }
         if (!this._compact && !this._sheet.open) {
             const data = current?.preview?.() ?? null;
+            const wasHidden = !this._side.visible;
             this._preview.show(data);
             this._side.visible = Boolean(data);
+            if (data && wasHidden && !this._lone)
+                this._reveal(this._side, 0, 0);
         }
     }
 

@@ -9,7 +9,10 @@ import {SPRINGS, settleMs, springAt} from '../lib/spring.js';
 // The capsule's height uses a spring that does not overshoot, since 28 % of
 // a height would show. Selection fades in 120 ms through the stylesheet.
 export const OPEN = SPRINGS.mono;
-export const GROW = {damping: 1, stiffness: 900};
+export const GROW = {damping: 1, stiffness: 620};
+// The panel's arrival: barely past its size (about 0.5 %), so it settles
+// like Spotlight's instead of bouncing.
+export const ARRIVE = {damping: 0.86, stiffness: 620};
 export const SELECT_MS = 120;
 export const PRESS_SCALE = 0.97;
 
