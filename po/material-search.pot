@@ -178,6 +178,14 @@ msgstr ""
 msgid "Lets the windows show through the panel."
 msgstr ""
 
+#: extension/prefs.js:220
+msgid "Blur like Blur My Shell"
+msgstr ""
+
+#: extension/prefs.js:220
+msgid "The panel takes the opacity Blur My Shell gives windows. Off: Lantern’s own."
+msgstr ""
+
 #: extension/prefs.js:219 extension/prefs.js:220
 msgid "Motion"
 msgstr ""

@@ -9,7 +9,7 @@
     background-color: transparent;
 }
 
-/* The floating capsule. One static shadow, no blur behind it. */
+/* The floating capsule. One static shadow; a blur behind it only from Blur My Shell. */
 .ms-capsule {
     padding: 18px;
     border: 1px solid transparent;
@@ -321,6 +321,12 @@
 /* Off by default: the capsule at 78 %, everything inside it stays solid. */
 .ms-root .ms-capsule.ms-see-through {
     background-color: $bar@78;
+}
+
+/* While Blur My Shell blurs what lies behind (views/blur.js): the capsule at
+   50 %, so the blur shows through; everything inside it stays solid. */
+.ms-root .ms-capsule.ms-blurred {
+    background-color: $bar@50;
 }
 
 .ms-root .ms-field {

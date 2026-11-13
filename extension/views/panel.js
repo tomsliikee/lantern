@@ -26,15 +26,8 @@ import {copy} from '../sources/calculator.js';
 import {launchContext} from '../sources/apps.js';
 import {icon} from './icons.js';
 import {AskCard, AskChip} from './ask.js';
+import {CapsuleBlur} from './blur.js';
 import {ARRIVE, GROW, Spring, setMotionCheck} from './motion.js';
-
-// Blur My Shell's own defaults for its static blur.
-const BLUR_MY_SHELL_UUID = 'blur-my-shell@aunetx';
-const BLUR_RADIUS = 30;
-const BLUR_BRIGHTNESS = 0.6;
-const BLUR_MY_SHELL_SCHEMA = 'org.gnome.shell.extensions.blur-my-shell';
-// ExtensionState.ENABLED (1), as Blur My Shell itself compares it.
-const EXTENSION_ENABLED = 1;
 import {AnswerCard, Group, TopHit} from './rows.js';
 import {ActionSheet, Preview} from './side.js';
 import {label, setText, styleEntry} from './text.js';
@@ -92,7 +85,8 @@ export class Panel {
         this._closing = false;
         this._debug = Boolean(GLib.getenv('MATERIAL_SEARCH_DEBUG'));
         this._build();
-        this._watchBlur();
+        // Only while Blur My Shell is enabled; otherwise nothing is added.
+        this._blur = new CapsuleBlur(this._backdrop, this._capsule, settings, () => this._scheme);
         // Switching AI off ends a conversation that is open.
         this._aiSignal = settings.connect('changed::ai', () => {
             if (!settings.get_boolean('ai') && this._ask) {
@@ -284,6 +278,7 @@ export class Panel {
             this._backdrop.remove_style_class_name(`ms-root-${this._scheme}`);
         this._scheme = scheme;
         this._backdrop.add_style_class_name(`ms-root-${scheme}`);
+        this._blur?.refresh();
     }
 
     _layout() {
@@ -969,64 +964,8 @@ export class Panel {
         }
     }
 
-    // Blur behind the capsule only while Blur My Shell is enabled: the blur
-    // costs frames on integrated graphics, so without it nothing is added.
-    _watchBlur() {
-        this._blurSignal = Main.extensionManager.connect('extension-state-changed', (_m, extension) => {
-            if (extension.uuid === BLUR_MY_SHELL_UUID)
-                this._applyBlur();
-        });
-        // Blur My Shell's global strength, when its schema is installed.
-        // Its pipelines (liquid glass and the like) are its own shader code
-        // and cannot be shared, so only sigma and brightness are followed.
-        const source = Gio.SettingsSchemaSource.get_default();
-        this._blurSettings = source?.lookup(BLUR_MY_SHELL_SCHEMA, true)
-            ? new Gio.Settings({schema_id: BLUR_MY_SHELL_SCHEMA})
-            : null;
-        if (this._blurSettings) {
-            this._blurSettingsIds = ['sigma', 'brightness'].map(key =>
-                this._blurSettings.connect(`changed::${key}`, () => this._updateBlur()));
-        }
-        this._applyBlur();
-    }
-
-    _blurParams() {
-        const scale = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        const sigma = this._blurSettings?.get_int('sigma') ?? BLUR_RADIUS;
-        const brightness = this._blurSettings?.get_double('brightness') ?? BLUR_BRIGHTNESS;
-        return {radius: sigma * scale, brightness};
-    }
-
-    _updateBlur() {
-        if (!this._blur)
-            return;
-        const {radius, brightness} = this._blurParams();
-        this._blur.radius = radius;
-        this._blur.brightness = brightness;
-    }
-
-    _applyBlur() {
-        const ext = Main.extensionManager.lookup(BLUR_MY_SHELL_UUID);
-        const wanted = ext?.state === EXTENSION_ENABLED;
-        if (wanted && !this._blur) {
-            this._blur = new Shell.BlurEffect({mode: Shell.BlurMode.ACTOR, ...this._blurParams()});
-            this._capsule.add_effect_with_name('lantern-blur', this._blur);
-        } else if (!wanted && this._blur) {
-            this._capsule.remove_effect(this._blur);
-            this._blur = null;
-        }
-    }
-
     destroy() {
-        if (this._blurSignal) {
-            Main.extensionManager.disconnect(this._blurSignal);
-            this._blurSignal = 0;
-        }
-        if (this._blurSettings) {
-            for (const id of this._blurSettingsIds)
-                this._blurSettings.disconnect(id);
-            this._blurSettings = null;
-        }
+        this._blur.destroy();
         if (this._isOpen)
             this.close();
         if (this._closing)

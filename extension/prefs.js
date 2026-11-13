@@ -216,6 +216,9 @@ function generalPage(settings, window) {
     const seeThrough = new Adw.SwitchRow({title: _('See-through'), subtitle: _('Lets the windows show through the panel.')});
     settings.bind('see-through', seeThrough, 'active', Gio.SettingsBindFlags.DEFAULT);
     look.add(seeThrough);
+    const blurFollow = new Adw.SwitchRow({title: _('Blur like Blur My Shell'), subtitle: _('The panel takes the opacity Blur My Shell gives windows. Off: Lantern’s own.')});
+    settings.bind('blur-follow', blurFollow, 'active', Gio.SettingsBindFlags.DEFAULT);
+    look.add(blurFollow);
     page.add(look);
 
     const motion = new Adw.PreferencesGroup({title: _('Motion')});

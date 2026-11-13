@@ -30,6 +30,11 @@
       <summary>See-through</summary>
       <description>Lets the windows show through the panel's outer surface, as in Halo. No blur.</description>
     </key>
+    <key name="blur-follow" type="b">
+      <default>false</default>
+      <summary>Blur like Blur My Shell</summary>
+      <description>While Blur My Shell is enabled: true gives the panel the same opacity over the blur as Blur My Shell gives windows; false keeps Lantern's own 50 %.</description>
+    </key>
     <key name="animations" type="b">
       <default>true</default>
       <summary>Motion</summary>
