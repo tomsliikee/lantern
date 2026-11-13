@@ -194,6 +194,52 @@
     padding-top: $space-card-gap;
 }
 
+/* The ask mode: a card of turns, the question above its answer. */
+.ms-ask {
+    padding: $space-card $space-card $space-card-bottom;
+    border-radius: $radius-card;
+}
+
+.ms-ask-turn {
+    spacing: 10px;
+}
+
+.ms-ask-next {
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.ms-ask-reply {
+    spacing: 12px;
+}
+
+.ms-ask-code {
+    padding: 14px 16px;
+    border-radius: 16px;
+}
+
+.ms-ask-dots {
+    spacing: 6px;
+    padding: 6px 0;
+}
+
+.ms-ask-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-full;
+}
+
+.ms-chip {
+    padding: 0 12px 0 8px;
+    height: 32px;
+    spacing: 6px;
+    border-radius: $radius-full;
+}
+
+.ms-chip-icon {
+    icon-size: 18px;
+}
+
 .ms-preview {
     width: 280px;
     padding: $space-card $space-card $space-card-bottom;
@@ -381,4 +427,30 @@
 
 .ms-root .ms-error {
     color: $down;
+}
+
+.ms-root .ms-ask {
+    background-color: $card;
+    color: $ink;
+}
+
+.ms-root .ms-ask-next {
+    border-top: 1px solid $line;
+}
+
+.ms-root .ms-ask-said {
+    color: $ink2;
+}
+
+.ms-root .ms-ask-code {
+    background-color: $fill;
+}
+
+.ms-root .ms-ask-dot {
+    background-color: $ink2;
+}
+
+.ms-root .ms-chip {
+    background-color: $bar;
+    color: $ink;
 }

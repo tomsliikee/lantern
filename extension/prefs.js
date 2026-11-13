@@ -5,9 +5,11 @@ import Gdk from 'gi://Gdk';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Gtk from 'gi://Gtk';
+import Soup from 'gi://Soup?version=3.0';
 
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
+import {OLLAMA_URL} from './lib/ai.js';
 import {installedProviders} from './lib/providerlist.js';
 import {conflicts, normalize} from './lib/shortcut.js';
 import {colors, serifFamily, sizes} from './lib/tokens.js';
@@ -291,6 +293,45 @@ function sourcesPage(settings) {
     return page;
 }
 
+// Ask mode: the switch for all of it, and the Ollama model.
+function askPage(settings) {
+    const page = new Adw.PreferencesPage({title: _('Ask'), icon_name: 'dialog-question-symbolic'});
+    const group = new Adw.PreferencesGroup({
+        title: _('Ask an AI'),
+        description: _('Claude and agy send your question to their service. Ollama stays here.'),
+    });
+    const enabled = new Adw.SwitchRow({title: _('Ask with a prefix'), subtitle: _('claude:, agy: and ollama: then a question, sent with Enter. Off: searched like any other text.')});
+    settings.bind('ai', enabled, 'active', Gio.SettingsBindFlags.DEFAULT);
+    group.add(enabled);
+    page.add(group);
+
+    const local = new Adw.PreferencesGroup({title: _('Ollama'), description: _('Loads while you type the prefix.')});
+    const model = new Adw.EntryRow({title: _('Model'), text: settings.get_string('ollama-model')});
+    model.connect('changed', () => {
+        if (model.text.trim() !== '')
+            settings.set_string('ollama-model', model.text.trim());
+    });
+    const installed = new Adw.ActionRow({title: _('Installed'), subtitle: _('Looking…')});
+    local.add(model);
+    local.add(installed);
+    page.add(local);
+    for (const row of [local, model])
+        settings.bind('ai', row, 'sensitive', Gio.SettingsBindFlags.GET);
+
+    // The models the server lists, so the name can be copied right.
+    const session = new Soup.Session({timeout: 3});
+    session.send_and_read_async(Soup.Message.new('GET', `${OLLAMA_URL}/api/tags`), GLib.PRIORITY_DEFAULT, null, (_session, result) => {
+        try {
+            const bytes = session.send_and_read_finish(result);
+            const names = JSON.parse(new TextDecoder().decode(bytes.get_data())).models.map(m => m.name);
+            installed.subtitle = names.length > 0 ? names.join(', ') : _('No model yet. Pull one with “ollama pull”.');
+        } catch {
+            installed.subtitle = _('Ollama is not reachable.');
+        }
+    });
+    return page;
+}
+
 function privacyPage(settings) {
     const page = new Adw.PreferencesPage({title: _('Privacy'), icon_name: 'security-medium-symbolic'});
     const group = new Adw.PreferencesGroup({
@@ -319,6 +360,7 @@ export default class MaterialSearchPreferences extends ExtensionPreferences {
         applyLook(window);
         window.add(generalPage(settings, window));
         window.add(sourcesPage(settings));
+        window.add(askPage(settings));
         window.add(privacyPage(settings));
     }
 }

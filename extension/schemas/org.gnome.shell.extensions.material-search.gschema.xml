@@ -64,6 +64,16 @@
       <default>''</default>
       <summary>Address of a custom search engine, with %s for the query</summary>
     </key>
+    <key name="ai" type="b">
+      <default>true</default>
+      <summary>Ask Claude, agy or Ollama with a prefix</summary>
+      <description>claude:, agy: and ollama: in the field send the text after the colon to that program. Off: the prefixes are searched like any other text and nothing is ever started.</description>
+    </key>
+    <key name="ollama-model" type="s">
+      <default>'qwen2.5:3b'</default>
+      <summary>The model that ollama: asks</summary>
+      <description>A model installed in Ollama (ollama list). It runs on this computer.</description>
+    </key>
     <key name="learn" type="b">
       <default>true</default>
       <summary>Rank by what was opened</summary>

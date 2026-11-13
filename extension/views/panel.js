@@ -16,13 +16,16 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {ensureActorVisibleInScrollView} from 'resource:///org/gnome/shell/misc/animationUtils.js';
 import {gettext as _, ngettext} from 'resource:///org/gnome/shell/extensions/extension.js';
 
+import {parsePrefix} from '../lib/ai.js';
 import {flatten} from '../lib/rank.js';
 import {SPRINGS} from '../lib/spring.js';
 import {searchUrl} from '../lib/format.js';
 import {Search} from '../search.js';
+import {AskRunner} from '../sources/ai.js';
 import {copy} from '../sources/calculator.js';
 import {launchContext} from '../sources/apps.js';
 import {icon} from './icons.js';
+import {AskCard, AskChip} from './ask.js';
 import {ARRIVE, GROW, Spring, setMotionCheck} from './motion.js';
 import {AnswerCard, Group, TopHit} from './rows.js';
 import {ActionSheet, Preview} from './side.js';
@@ -64,6 +67,9 @@ export class Panel {
         this._power = power;
         this._onOpened = onOpened;
         this._search = new Search({sources, onResults: (arrangement, info) => this._render(arrangement, info)});
+        // The ask mode: null, or {provider, running, started, ms}.
+        this._ask = null;
+        this._runner = new AskRunner({onEvent: event => this._askEvent(event)});
         this._scheme = null;
         this._isOpen = false;
         this._grab = null;
@@ -78,6 +84,15 @@ export class Panel {
         this._closing = false;
         this._debug = Boolean(GLib.getenv('MATERIAL_SEARCH_DEBUG'));
         this._build();
+        // Switching AI off ends a conversation that is open.
+        this._aiSignal = settings.connect('changed::ai', () => {
+            if (!settings.get_boolean('ai') && this._ask) {
+                if (this._isOpen)
+                    this._exitAsk();
+                else
+                    this._resetAsk();
+            }
+        });
     }
 
     get isOpen() {
@@ -100,8 +115,10 @@ export class Panel {
         // The search pill.
         const field = new St.BoxLayout({style_class: 'ms-field', x_expand: true});
         field.add_child(new St.Icon({gicon: icon('search'), style_class: 'ms-field-icon', y_align: Clutter.ActorAlign.CENTER}));
+        this._chip = new AskChip();
+        field.add_child(this._chip.actor);
         this._entry = new St.Entry({style_class: 'ms-entry', x_expand: true, y_align: Clutter.ActorAlign.CENTER, can_focus: true});
-        const hint = label('query-hint', {style_class: 'ms-hint'});
+        const hint = this._hint = label('query-hint', {style_class: 'ms-hint'});
         setText(hint, _('Search anything'));
         this._entry.hint_actor = hint;
         // The pill on its own sets its text larger than the panel does.
@@ -128,6 +145,13 @@ export class Panel {
         this._resultsColumn.add_child(this._scroll);
         this._body.add_child(this._resultsColumn);
 
+        // The ask mode's card scrolls with the rest, and follows the text
+        // while an answer is coming in.
+        this._askCard = new AskCard({motion: () => this._motion()});
+        this._scroll.vadjustment.connect('changed', adjustment => {
+            if (this._ask?.running)
+                adjustment.value = adjustment.upper - adjustment.page_size;
+        });
         this._topHit = new TopHit({enterText: _('Open')});
         this._answer = new AnswerCard();
         this._calm = new St.BoxLayout({orientation: Clutter.Orientation.VERTICAL, style_class: 'ms-calm', x_expand: true});
@@ -138,6 +162,7 @@ export class Panel {
         this._groups = Array.from({length: GROUPS}, () => new Group({rows: ROWS_PER_GROUP}));
         for (const actor of [this._topHit, this._answer, this._calm])
             this._results.add_child(actor);
+        this._results.add_child(this._askCard.actor);
         for (const group of this._groups)
             this._results.add_child(group.actor);
         for (const actor of [this._topHit, this._answer, this._calm])
@@ -191,6 +216,16 @@ export class Panel {
         this._fadeSpring = new Spring(this._capsule, value => {
             this._capsule.opacity = Math.round(255 * Math.min(1, Math.max(0, value)));
         }, SPRINGS.effectSlow, 0.01);
+        // The shadow reaches past the capsule, so whenever the capsule gets
+        // smaller (dots gone, a notice shorter than the answer, the card
+        // left) the old shadow pixels would stay as a ghost rectangle.
+        this._capsuleHeight = 0;
+        this._capsule.connect('notify::height', () => {
+            const height = this._capsule.height;
+            if (height < this._capsuleHeight)
+                this._backdrop.queue_redraw();
+            this._capsuleHeight = height;
+        });
         setMotionCheck(() => this._motion());
         this._growSpring = new Spring(this._capsule, value => {
             this._capsule.height = Math.round(value);
@@ -310,6 +345,7 @@ export class Panel {
             return;
         this._isOpen = false;
         this._search.stop();
+        this._runner.reset();
         this._sheet.hide();
         if (this._grab) {
             Main.popModal(this._grab);
@@ -348,6 +384,7 @@ export class Panel {
         this._backdrop.hide();
         this._capsule.opacity = 255;
         this._capsule.set_scale(1, 1);
+        this._resetAsk();
         this._quiet = true;
         this._entry.text = '';
         this._quiet = false;
@@ -384,7 +421,147 @@ export class Panel {
             return;
         this._sheet.hide();
         this._resultsColumn.visible = true;
-        this._search.run(this._entry.get_text());
+        // In the ask mode the field holds the next prompt, not a search.
+        if (this._ask)
+            return;
+        const prefix = this._settings.get_boolean('ai') ? parsePrefix(this._entry.get_text()) : null;
+        if (prefix)
+            this._enterAsk(prefix.provider, prefix.prompt);
+        else
+            this._search.run(this._entry.get_text());
+    }
+
+    // "claude:" typed: the chip takes the prefix's place and the rest of
+    // the field is the prompt.
+    _enterAsk(provider, prompt) {
+        this._search.stop();
+        this._clearResults();
+        // Ollama's model is fixed for the conversation; it loads while the
+        // prompt is typed.
+        const model = provider.http ? this._settings.get_string('ollama-model') : null;
+        this._ask = {provider, model, running: false, started: 0, ms: 0};
+        if (model)
+            this._runner.warm(model);
+        this._chip.show(provider.name);
+        setText(this._hint, _('Ask %s').format(provider.name));
+        this._side.visible = false;
+        this._quiet = true;
+        this._entry.text = prompt;
+        this._entry.clutter_text.set_cursor_position(-1);
+        this._quiet = false;
+        this._setLone(this._askCard.empty, true);
+    }
+
+    // Esc: the prompt, the answers and the conversation go; search is back.
+    _exitAsk() {
+        this._resetAsk();
+        this._quiet = true;
+        this._entry.text = '';
+        this._quiet = false;
+        this._clearResults();
+        this._setLone(true, true);
+    }
+
+    _resetAsk() {
+        this._runner.reset();
+        this._askCard.clear();
+        this._chip.hide();
+        setText(this._hint, _('Search anything'));
+        this._ask = null;
+        this._side.visible = !this._compact;
+    }
+
+    _askSend() {
+        const ask = this._ask;
+        const prompt = this._entry.get_text().trim();
+        if (!ask || ask.running || prompt === '')
+            return;
+        this._askCard.addTurn(prompt);
+        this._quiet = true;
+        this._entry.text = '';
+        this._quiet = false;
+        setText(this._hint, _('Ask a follow-up'));
+        ask.running = true;
+        ask.started = GLib.get_monotonic_time();
+        this._setLone(false, true);
+        this._runner.send(ask.provider, prompt, {model: ask.model});
+        this._askFooter();
+    }
+
+    _askEvent(event) {
+        const ask = this._ask;
+        if (!ask || !this._isOpen)
+            return;
+        if (event.kind === 'text') {
+            this._askCard.append(event.text);
+            return;
+        }
+        if (event.kind !== 'done' && event.kind !== 'error')
+            return;
+        ask.running = false;
+        ask.ms = (GLib.get_monotonic_time() - ask.started) / 1000;
+        const name = ask.provider.name;
+        if (event.kind === 'error')
+            this._askCard.fail(_('%s did not answer.').format(name), event.message);
+        else if (this._askCard.lastReply === '')
+            this._askCard.fail(_('%s sent nothing back.').format(name), '');
+        this._askCard.thinking(false);
+        this._askFooter();
+    }
+
+    _askFooter() {
+        const ask = this._ask;
+        const hints = ask.running ? [_('Esc to stop')] : [_('Enter to ask a follow-up'), _('Esc to go back')];
+        this._keyLabels.forEach((hintLabel, i) => {
+            hintLabel.visible = i < hints.length;
+            if (i < hints.length)
+                setText(hintLabel, hints[i]);
+        });
+        this._stats.visible = !ask.running && ask.ms > 0;
+        if (this._stats.visible)
+            setText(this._stats, _('%s, %.1f s').format(ask.model ?? ask.provider.name, ask.ms / 1000));
+    }
+
+    // Keys of the ask mode; null leaves the key to the field.
+    _askKey(symbol, ctrl) {
+        switch (symbol) {
+        case Clutter.KEY_Escape:
+            if (this._ask.running) {
+                this._runner.cancel();
+                this._ask.running = false;
+                this._askCard.stop();
+                this._askFooter();
+            } else {
+                this._exitAsk();
+            }
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_Return:
+        case Clutter.KEY_KP_Enter:
+        case Clutter.KEY_ISO_Enter:
+            this._askSend();
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_Up:
+        case Clutter.KEY_Down:
+        case Clutter.KEY_Page_Up:
+        case Clutter.KEY_Page_Down: {
+            const adjustment = this._scroll.vadjustment;
+            const step = symbol === Clutter.KEY_Up || symbol === Clutter.KEY_Down ? 60 : adjustment.page_size * 0.9;
+            adjustment.value += symbol === Clutter.KEY_Up || symbol === Clutter.KEY_Page_Up ? -step : step;
+            return Clutter.EVENT_STOP;
+        }
+        case Clutter.KEY_Tab:
+        case Clutter.KEY_ISO_Left_Tab:
+            return Clutter.EVENT_STOP;
+        case Clutter.KEY_c:
+        case Clutter.KEY_C:
+            if (ctrl && this._askCard.lastReply !== '' && !this._entry.clutter_text.get_selection()) {
+                copy(this._askCard.lastReply);
+                return Clutter.EVENT_STOP;
+            }
+            return null;
+        default:
+            return null;
+        }
     }
 
     // Opened, nothing typed: the pill on its own. With text: the panel.
@@ -709,6 +886,11 @@ export class Panel {
         const symbol = event.get_key_symbol();
         const state = event.get_state();
         const ctrl = (state & Clutter.ModifierType.CONTROL_MASK) !== 0;
+        if (this._ask) {
+            const handled = this._askKey(symbol, ctrl);
+            if (handled !== null)
+                return handled;
+        }
         switch (symbol) {
         case Clutter.KEY_Escape:
             if (this._sheet.open)
@@ -789,6 +971,8 @@ export class Panel {
             this._usage.save();
         }
         this._search.stop();
+        this._runner.destroy();
+        this._settings.disconnect(this._aiSignal);
         this._openSpring.stop();
         this._fadeSpring.stop();
         this._growSpring.stop();

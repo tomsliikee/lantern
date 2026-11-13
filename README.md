@@ -41,6 +41,7 @@ It is built around three rules, in this order: **fast** (the in-memory sources a
 - **Ranking by Use:** What you open for what you typed comes first next time. Counts lose half their weight every two weeks.
 - **Insights Mono:** One look, black and white with air, light and dark after the system's setting. Statements (the empty field's invitation, the query, group headings, the name in the preview, "Actions", "Nothing here") are in **Geist Serif**, everything else in **Inter** with tabular figures. No colour styles, no blur.
 - **See-Through:** The panel's outer surface at 78 % lets the windows show through; field, rows and preview stay solid. No blur. Off by default.
+- **Ask Claude, agy or a local model:** `claude: question`, `agy: question` or `ollama: question` turns the prefix into a chip and sends the text to that command line program on **Enter**. The answer streams into a card in the panel, code on its own box; more text and **Enter** is a follow-up in the same conversation. **Esc** stops a running answer, then leaves the mode and the conversation (a second **Esc** closes the panel). Claude runs without tools, text only. `ollama:` asks the model set in the settings (default `qwen2.5:3b`) on the local Ollama server; the model loads while you type the prefix, and follow-ups send the conversation so far. **Settings → Ask** switches all of it off; then the prefixes are searched like any other text and nothing is started. One process per question, nothing runs in between. Each question uses the program's own account and quota, and **Claude takes about 10 s per answer on the laptop** (the same from a terminal).
 - **Compact on Small Screens:** Without the preview column below **1400** logical pixels, or always, or never.
 - **English and German.**
 
@@ -184,6 +185,9 @@ tools/headless/run.sh keys 60
 | Settings window | *Tested* in the headless shell: opened, a switch clicked and taken over by the panel, pages shown |
 | Opening an app, a file, a window, a system action for real | *Built*: the code paths ran, nothing was opened on a real desktop |
 | The first-enable question about Super+Space | *Tested* that Ctrl+Space is taken and works; the notification's buttons were not clicked |
+| Ask mode with `claude:` | *Tested* in the headless shell: chip, streaming, code block, follow-up, Esc, once against the real `claude` and with a stand-in program. Unit tests for the prefix, command lines and both stream formats |
+| Ask mode with `ollama:` and the AI switch | *Tested* in the headless shell against the local Ollama (`qwen2.5:3b`): streaming, a follow-up that knew the earlier answer, and the switch off (the prefix is searched as text). On this CPU about 10 tokens/s, the 7b model about 4. The Ask settings page was opened; the model field was not edited |
+| Ask mode with `agy:` | *Built*: the stream format and a follow-up were tested from a terminal; in the headless shell the program was not signed in (it opened a browser sign-in), so no answer was seen in the panel |
 | The real session (install.sh, a real screen, motion seen, `powertop`) | Not yet |
 
 A search provider that is not running is started by its first question, which usually takes longer than 300 ms; its results then come from the second question on.

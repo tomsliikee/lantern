@@ -544,3 +544,87 @@ msgstr ""
 #: extension/sources/windows.js:115
 msgid "Close window"
 msgstr ""
+
+#: extension/views/panel.js
+#, c-format
+msgid "Ask %s"
+msgstr ""
+
+#: extension/views/panel.js
+msgid "Ask a follow-up"
+msgstr ""
+
+#: extension/views/panel.js
+#, c-format
+msgid "%s did not answer."
+msgstr ""
+
+#: extension/views/panel.js
+#, c-format
+msgid "%s sent nothing back."
+msgstr ""
+
+#: extension/views/panel.js
+msgid "Esc to stop"
+msgstr ""
+
+#: extension/views/panel.js
+msgid "Enter to ask a follow-up"
+msgstr ""
+
+#: extension/views/panel.js
+msgid "Esc to go back"
+msgstr ""
+
+#: extension/views/panel.js
+#, c-format
+msgid "%s, %.1f s"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Ask"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Ask an AI"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Claude and agy send your question to their service. Ollama stays here."
+msgstr ""
+
+#: extension/prefs.js
+msgid "Ask with a prefix"
+msgstr ""
+
+#: extension/prefs.js
+msgid "claude:, agy: and ollama: then a question, sent with Enter. Off: searched like any other text."
+msgstr ""
+
+#: extension/prefs.js
+msgid "Ollama"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Loads while you type the prefix."
+msgstr ""
+
+#: extension/prefs.js
+msgid "Model"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Installed"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Looking…"
+msgstr ""
+
+#: extension/prefs.js
+msgid "No model yet. Pull one with “ollama pull”."
+msgstr ""
+
+#: extension/prefs.js
+msgid "Ollama is not reachable."
+msgstr ""

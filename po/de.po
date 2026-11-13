@@ -552,3 +552,87 @@ msgstr "Minimieren"
 #: extension/sources/windows.js:115
 msgid "Close window"
 msgstr "Fenster schließen"
+
+#: extension/views/panel.js
+#, c-format
+msgid "Ask %s"
+msgstr "%s fragen"
+
+#: extension/views/panel.js
+msgid "Ask a follow-up"
+msgstr "Folgefrage stellen"
+
+#: extension/views/panel.js
+#, c-format
+msgid "%s did not answer."
+msgstr "%s hat nicht geantwortet."
+
+#: extension/views/panel.js
+#, c-format
+msgid "%s sent nothing back."
+msgstr "%s hat nichts zurückgeschickt."
+
+#: extension/views/panel.js
+msgid "Esc to stop"
+msgstr "Esc bricht ab"
+
+#: extension/views/panel.js
+msgid "Enter to ask a follow-up"
+msgstr "Enter für eine Folgefrage"
+
+#: extension/views/panel.js
+msgid "Esc to go back"
+msgstr "Esc geht zurück"
+
+#: extension/views/panel.js
+#, c-format
+msgid "%s, %.1f s"
+msgstr "%s, %.1f s"
+
+#: extension/prefs.js
+msgid "Ask"
+msgstr "Fragen"
+
+#: extension/prefs.js
+msgid "Ask an AI"
+msgstr "Eine KI fragen"
+
+#: extension/prefs.js
+msgid "Claude and agy send your question to their service. Ollama stays here."
+msgstr "Claude und agy schicken deine Frage an ihren Dienst. Ollama bleibt hier."
+
+#: extension/prefs.js
+msgid "Ask with a prefix"
+msgstr "Mit Prefix fragen"
+
+#: extension/prefs.js
+msgid "claude:, agy: and ollama: then a question, sent with Enter. Off: searched like any other text."
+msgstr "claude:, agy: und ollama: mit einer Frage, abgeschickt mit Enter. Aus: wird wie jeder andere Text gesucht."
+
+#: extension/prefs.js
+msgid "Ollama"
+msgstr "Ollama"
+
+#: extension/prefs.js
+msgid "Loads while you type the prefix."
+msgstr "Lädt, während du den Prefix tippst."
+
+#: extension/prefs.js
+msgid "Model"
+msgstr "Modell"
+
+#: extension/prefs.js
+msgid "Installed"
+msgstr "Installiert"
+
+#: extension/prefs.js
+msgid "Looking…"
+msgstr "Suche…"
+
+#: extension/prefs.js
+msgid "No model yet. Pull one with “ollama pull”."
+msgstr "Noch kein Modell. Lade eins mit „ollama pull“."
+
+#: extension/prefs.js
+msgid "Ollama is not reachable."
+msgstr "Ollama ist nicht erreichbar."

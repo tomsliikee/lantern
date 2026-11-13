@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Material Search: ask mode</title>
+<style>
+/* Mockup of the claude: / agy: ask mode. Same tokens as material-search.html. */
+   insights-mono/tokens.json (light and dark). The extension in extension/
+   is built after it; tools/headless/scripts/gallery.js renders the real
+   panel in the same states. */
+@font-face { font-family: "Inter"; src: url("insights-mono/fonts/InterVariable.ttf") format("truetype"); font-weight: 100 900; }
+@font-face { font-family: "Geist Serif"; src: url("insights-mono/fonts/GeistSerif-Regular.ttf") format("truetype"); font-weight: 400; }
+
+:root {
+  color-scheme: light;
+  --bg: #ffffff; --card: #f4f4f6; --fill: #e6e6ea; --line: #e0e0e4;
+  --ink: #0c0c0e; --ink2: #5e5e64; --ink3: #a3a3a8;
+  --solid: #0c0c0e; --on-solid: #ffffff;
+  --bar: #ffffff; --rim: rgba(0,0,0,0.08);
+  --down: #ba1a1a;
+  --shadow-bar: 0 14px 24px -4px rgba(0,0,0,0.14), 0 1px 4px rgba(0,0,0,0.08);
+  --shadow-panel: 0 30px 60px -8px rgba(0,0,0,0.22), 0 1px 4px rgba(0,0,0,0.08);
+  --desk: #d9d9de;
+  --space-gutter: 16px; --space-card: 18px; --space-card-bottom: 20px; --space-card-gap: 28px;
+  --space-statement: 12px; --space-block: 14px; --space-icon: 7px; --space-label: 4px;
+  --radius-card: 22px; --radius-search: 26px; --radius-bar: 30px;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000000; --card: #161618; --fill: #26262a; --line: #2c2c30;
+  --ink: #f5f5f7; --ink2: #a1a1a6; --ink3: #636366;
+  --solid: #f5f5f7; --on-solid: #000000;
+  --bar: #1c1c1e; --rim: rgba(255,255,255,0.12);
+  --down: #ff8a80;
+  --shadow-bar: 0 14px 24px -4px rgba(0,0,0,0.5), 0 1px 4px rgba(0,0,0,0.3);
+  --shadow-panel: 0 30px 60px -8px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.3);
+  --desk: #0b0b0d;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--desk); }
+body {
+  margin: 0; padding: 0 0 96px; color: var(--ink);
+  font: 400 15px/21px Inter, system-ui, sans-serif; font-feature-settings: "tnum" 1;
+  -webkit-font-smoothing: antialiased;
+}
+svg.i { width: 22px; height: 22px; fill: currentColor; flex: none; }
+button { font: inherit; color: inherit; }
+
+.topbar { height: 32px; display: flex; align-items: center; justify-content: center; font: 600 13px/18px Inter, sans-serif; background: #000; color: #fff; }
+.toggle { position: fixed; top: 44px; right: 16px; z-index: 5; height: 44px; padding: 0 18px; border: 0; border-radius: 9999px; background: var(--bar); color: var(--ink); font: 600 14px/19px Inter, sans-serif; box-shadow: var(--shadow-bar), inset 0 0 0 0.8px var(--rim); cursor: pointer; }
+main { display: flex; flex-direction: column; align-items: center; padding: 48px 16px 0; }
+.caption { width: 760px; max-width: 100%; margin: 72px 0 16px; font: 500 13px/18px Inter, sans-serif; color: var(--ink2); }
+.caption:first-child { margin-top: 0; }
+
+/* ---- Panel: a floating capsule. Cards are flat inside it. ---- */
+.panel, .lone { width: 760px; max-width: 100%; background: var(--bar); color: var(--ink); box-shadow: var(--shadow-panel), inset 0 0 0 0.8px var(--rim); }
+.panel { padding: 16px; border-radius: var(--radius-bar); }
+.panel.compact { width: 560px; }
+.lone { padding: 16px; border-radius: 9999px; }
+
+.field { height: 52px; display: flex; align-items: center; gap: 10px; padding: 0 12px 0 18px; border-radius: var(--radius-search); background: var(--fill); }
+.field .i { color: var(--ink2); }
+.serif { font-family: "Geist Serif", Georgia, serif; font-weight: 400; }
+.query { flex: 1; font: 400 24px/30px "Geist Serif", Georgia, serif; letter-spacing: -0.24px; white-space: nowrap; }
+.query.placeholder { color: var(--ink2); }
+.lone { padding: 18px 20px; }
+.lone .field { height: 64px; padding: 0 16px 0 24px; gap: 14px; }
+.lone .query { font-size: 28px; line-height: 34px; letter-spacing: -0.28px; }
+.lone .field .i { width: 24px; height: 24px; }
+.lone .caret { height: 30px; vertical-align: -6px; }
+.caret { display: inline-block; width: 2px; height: 26px; margin: 0 2px 0 1px; vertical-align: -4px; background: var(--ink); }
+.placeholder .caret { margin: 0 8px 0 0; }
+.kbd { height: 26px; padding: 0 10px; display: inline-flex; align-items: center; border-radius: 9999px; background: var(--bar); color: var(--ink2); font: 600 12px/16px Inter, sans-serif; }
+
+.body { display: flex; gap: var(--space-card-gap); padding-top: var(--space-card-gap); }
+.results { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.section { margin: 32px 0 8px 12px; font: 400 20px/26px "Geist Serif", Georgia, serif; letter-spacing: -0.2px; color: var(--ink); }
+.results > .section:first-child { margin-top: 0; }
+
+.tophit { display: flex; align-items: center; gap: 14px; padding: var(--space-card); padding-bottom: var(--space-card); border-radius: var(--radius-card); background: var(--card); }
+.tophit .text { flex: 1; min-width: 0; }
+.tophit .title { font: 600 17px/22px Inter, sans-serif; letter-spacing: -0.17px; }
+.row { display: flex; align-items: center; gap: 14px; height: 52px; padding: 0 14px 0 6px; border-radius: var(--radius-card); }
+.row + .row { margin-top: 4px; }
+.row.sel { background: var(--fill); }
+.text { min-width: 0; }
+.title { font: 400 15px/21px Inter, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.title b { font-weight: 800; }
+.sub { font: 400 13px/18px Inter, sans-serif; color: var(--ink2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .text { flex: 1; }
+.trail { font: 500 13px/18px Inter, sans-serif; color: var(--ink2); }
+
+.badge { width: 40px; height: 40px; border-radius: 9999px; display: grid; place-items: center; flex: none; background: var(--card); color: var(--ink); font: 600 16px/1 Inter, sans-serif; }
+.row.sel .badge { background: var(--bar); }
+.tophit .badge { width: 48px; height: 48px; background: var(--fill); }
+.badge .i { width: 20px; height: 20px; }
+
+.btn { height: 44px; padding: 0 20px; display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 9999px; background: var(--solid); color: var(--on-solid); font: 600 14px/18px Inter, sans-serif; cursor: pointer; }
+.btn .i { width: 20px; height: 20px; }
+.btn.tonal { background: var(--fill); color: var(--ink); }
+.tophit .btn { height: 40px; padding: 0 16px; }
+
+.preview { width: 280px; flex: none; align-self: flex-start; padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); display: flex; flex-direction: column; align-items: center; text-align: center; }
+.hero { width: 72px; height: 72px; border-radius: 9999px; background: var(--fill); display: grid; place-items: center; font: 600 30px/1 Inter, sans-serif; }
+.p-name { margin-top: var(--space-statement); font: 400 30px/34px "Geist Serif", Georgia, serif; letter-spacing: -0.3px; text-wrap: balance; }
+.p-kind { margin-top: var(--space-label); font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.btns { margin-top: 16px; display: flex; gap: 8px; }
+.p-list { width: 100%; margin-top: 8px; text-align: left; }
+.p-list .section { margin-left: 0; font-size: 18px; line-height: 24px; }
+.p-list .row { height: 48px; padding-left: 0; }
+.p-list .badge { background: var(--fill); }
+
+.foot { display: flex; justify-content: space-between; padding: 20px 12px 4px; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.keys { display: flex; gap: 20px; }
+
+/* ---- Sum, units, nothing found ---- */
+.answer { margin-top: var(--space-card-gap); padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); display: flex; align-items: center; gap: 20px; }
+.answer .big { font: 600 64px/72px Inter, sans-serif; letter-spacing: -1.28px; }
+.answer .big small { font: 500 14px/18px Inter, sans-serif; letter-spacing: 0; color: var(--ink2); margin-left: 8px; }
+.answer .meta { margin-left: auto; text-align: right; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.answer .meta b { display: block; font: 600 14px/18px Inter, sans-serif; color: var(--ink); }
+.calm { margin: var(--space-card-gap) 12px 0; font: 400 26px/32px "Geist Serif", Georgia, serif; letter-spacing: -0.264px; }
+.calm-sub { margin: 8px 12px 0; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); }
+.single { margin-top: var(--space-card-gap); }
+
+/* ---- Actions sheet: takes the place of the preview ---- */
+.sheet { width: 280px; flex: none; align-self: flex-start; padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); }
+.sheet h3 { margin: 0 0 var(--space-block) 4px; font: 400 26px/32px "Geist Serif", Georgia, serif; letter-spacing: -0.26px; }
+.sheet .row { padding-left: 4px; gap: 12px; }
+.sheet .row.sel { background: var(--fill); }
+.sheet .badge { width: 32px; height: 32px; background: var(--fill); }
+.sheet .row.sel .badge { background: var(--card); }
+.sheet .trail { margin-left: auto; }
+
+/* ---- Settings window ---- */
+.window { width: 640px; max-width: 100%; padding: 28px 28px 32px; border-radius: var(--radius-bar); background: var(--bg); color: var(--ink); box-shadow: var(--shadow-panel), inset 0 0 0 0.8px var(--rim); }
+.window h2 { margin: 0 0 var(--space-card-gap); font: 400 38px/44px "Geist Serif", Georgia, serif; letter-spacing: -0.76px; }
+.window h4 { margin: var(--space-card-gap) 0 var(--space-block); font: 400 24px/30px "Geist Serif", Georgia, serif; letter-spacing: -0.24px; }
+.window h4:first-of-type { margin-top: 0; }
+.group { padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); display: flex; flex-direction: column; gap: var(--space-card); }
+.setting { display: flex; align-items: center; gap: 12px; }
+.setting .text { flex: 1; }
+.setting .title { white-space: normal; }
+.switch { width: 52px; height: 32px; padding: 4px; border-radius: 9999px; background: var(--fill); display: flex; }
+.switch::after { content: ""; width: 24px; height: 24px; border-radius: 9999px; background: var(--ink2); }
+.switch.on { background: var(--solid); justify-content: flex-end; }
+.switch.on::after { background: var(--on-solid); }
+.value { font: 600 14px/18px Inter, sans-serif; color: var(--ink2); }
+.shortcut { height: 36px; padding: 0 14px; display: inline-flex; align-items: center; border-radius: 9999px; background: var(--fill); font: 600 14px/18px Inter, sans-serif; }
+.err { color: var(--down); }
+
+/* ---- Ask mode ---- */
+.chip { height: 32px; padding: 0 12px 0 8px; display: inline-flex; align-items: center; gap: 6px; border-radius: 9999px; background: var(--bar); color: var(--ink); font: 600 13px/18px Inter, sans-serif; flex: none; }
+.chip .i { width: 18px; height: 18px; }
+.panel.ask { width: 760px; }
+.ask .query { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.card { margin-top: var(--space-card-gap); padding: var(--space-card) var(--space-card) var(--space-card-bottom); border-radius: var(--radius-card); background: var(--card); max-height: 420px; overflow: hidden; }
+.turn + .turn { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); }
+.said { font: 400 20px/26px "Geist Serif", Georgia, serif; letter-spacing: -0.2px; color: var(--ink2); margin-bottom: 10px; }
+.reply { font: 400 15px/24px Inter, sans-serif; color: var(--ink); }
+.reply p { margin: 0 0 12px; } .reply p:last-child { margin-bottom: 0; }
+.reply code { font: 500 13px/20px ui-monospace, "JetBrains Mono", monospace; background: var(--fill); padding: 1px 6px; border-radius: 8px; }
+.reply pre { margin: 12px 0; padding: 14px 16px; border-radius: 16px; background: var(--fill); font: 400 13px/20px ui-monospace, "JetBrains Mono", monospace; overflow: hidden; }
+.w { opacity: 0; animation: in .28s cubic-bezier(.2,.9,.3,1) forwards; display: inline-block; white-space: pre; transform: translateY(2px); }
+.w.sp { white-space: pre-wrap; }
+@keyframes in { to { opacity: 1; transform: none; } }
+.live::after { content: ""; display: inline-block; width: 2px; height: 18px; margin-left: 2px; vertical-align: -3px; background: var(--ink); animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.think { display: flex; align-items: center; gap: 12px; color: var(--ink2); }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 8px; height: 8px; border-radius: 9999px; background: var(--ink2); animation: pulse 1.2s ease-in-out infinite; }
+.dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+@keyframes pulse { 0%, 80%, 100% { transform: scale(.6); opacity: .35; } 40% { transform: scale(1); opacity: 1; } }
+.hint { margin-top: var(--space-card-gap); padding: 0 12px; font: 400 13px/18px Inter, sans-serif; color: var(--ink2); display: flex; gap: 8px; align-items: center; }
+.btn.small { height: 36px; padding: 0 14px; font-size: 13px; margin-left: 12px; }
+@media (prefers-reduced-motion: reduce) { .w { animation: none; opacity: 1; transform: none; } .dots i, .live::after { animation: none; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></symbol>
+<symbol id="i-return" viewBox="0 0 24 24"><path d="M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7z"/></symbol>
+</defs></svg>
+<div class="topbar">Fri 13 Nov 14:32</div>
+<button class="toggle" id="toggle" type="button">Switch to dark</button>
+<main>
+
+  <p class="caption">1. Typed “claude: ” – the prefix becomes a chip, normal search is off. Nothing is sent yet.</p>
+  <section class="panel ask">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <span class="chip"><svg class="i"><use href="#i-spark"/></svg>Claude</span>
+      <div class="query">wie sortiere ich in js ein array<span class="caret"></span></div>
+      <span class="kbd">Esc</span>
+    </div>
+    <div class="hint"><span class="kbd">Enter</span><span>ask Claude · nothing is sent before you press it</span></div>
+  </section>
+
+  <p class="caption">2. Enter pressed – a soft pulse until the first word arrives.</p>
+  <section class="panel ask">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <span class="chip"><svg class="i"><use href="#i-spark"/></svg>Claude</span>
+      <div class="query">wie sortiere ich in js ein array</div>
+      <span class="kbd">Esc stops</span>
+    </div>
+    <div class="card"><div class="think"><div class="dots"><i></i><i></i><i></i></div><span class="sub">Claude is thinking…</span></div></div>
+  </section>
+
+  <p class="caption">3. The answer streams in word by word (press replay). The card grows with the text and scrolls when it is long.</p>
+  <section class="panel ask">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <span class="chip"><svg class="i"><use href="#i-spark"/></svg>Claude</span>
+      <div class="query placeholder"><span class="caret"></span>Ask a follow-up</div>
+      <button class="btn tonal small" id="replay" type="button">Replay</button>
+    </div>
+    <div class="card"><div class="turn"><div class="said">wie sortiere ich in js ein array</div>
+      <div class="reply" id="stream"></div></div></div>
+    <div class="foot"><div class="keys"><span><b>Enter</b> follow-up</span><span><b>Esc</b> back to search</span></div><span>claude-sonnet-5-5 · 2.1 s</span></div>
+  </section>
+
+  <p class="caption">4. A follow-up – the earlier turns stay above, the new question is the serif statement.</p>
+  <section class="panel ask">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <span class="chip"><svg class="i"><use href="#i-spark"/></svg>Claude</span>
+      <div class="query">und absteigend?<span class="caret"></span></div>
+      <span class="kbd">Enter</span>
+    </div>
+    <div class="card">
+      <div class="turn"><div class="said">wie sortiere ich in js ein array</div><div class="reply"><p>Mit <code>sort()</code> und einer Vergleichsfunktion.</p></div></div>
+      <div class="turn"><div class="said">und absteigend?</div><div class="reply"><div class="think"><div class="dots"><i></i><i></i><i></i></div></div></div></div>
+    </div>
+  </section>
+
+  <p class="caption">5. Something is wrong – one plain sentence in the calm style, the way “nothing found” looks today. Here with agy.</p>
+  <section class="panel ask compact">
+    <div class="field">
+      <svg class="i"><use href="#i-search"/></svg>
+      <span class="chip"><svg class="i"><use href="#i-spark"/></svg>agy</span>
+      <div class="query">erkläre rsync</div>
+      <span class="kbd">Esc</span>
+    </div>
+    <div class="calm">agy did not answer.</div>
+    <div class="calm-sub">It is not signed in. Run <code style="font:500 13px ui-monospace,monospace">agy</code> once in a terminal.</div>
+  </section>
+
+</main>
+<script>
+  const root = document.documentElement, button = document.getElementById('toggle');
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  function apply(t) { root.dataset.theme = t; button.textContent = t === 'dark' ? 'Switch to light' : 'Switch to dark'; }
+  apply(new URLSearchParams(location.search).get('theme') || (dark ? 'dark' : 'light'));
+  button.addEventListener('click', () => apply(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+
+  // Streaming demo: words fade in one after the other.
+  const stream = document.getElementById('stream');
+  const parts = [
+    ['p', 'Mit <code>sort()</code> und einer Vergleichsfunktion, sonst sortiert JavaScript Zahlen als Text.'],
+    ['pre', 'const zahlen = [10, 2, 33, 4];\nzahlen.sort((a, b) => a - b);\n// [2, 4, 10, 33]'],
+    ['p', '<code>sort()</code> ändert das Array selbst. Für eine Kopie nimm <code>toSorted()</code>.'],
+  ];
+  function play() {
+    stream.innerHTML = ''; let n = 0;
+    for (const [tag, html] of parts) {
+      const el = document.createElement(tag); stream.append(el);
+      const tmp = document.createElement('div'); tmp.innerHTML = html;
+      const add = (node, host) => {
+        if (node.nodeType === 3) {
+          for (const piece of node.textContent.split(/(\s+)/).filter(Boolean)) {
+            if (piece.includes('\n')) { host.append(document.createElement('br')); continue; }
+            const s = document.createElement('span'); s.className = 'w'; s.textContent = piece;
+            s.style.animationDelay = (n++ * 45) + 'ms'; host.append(s);
+          }
+        } else { const c = node.cloneNode(false); host.append(c); node.childNodes.forEach(k => add(k, c)); }
+      };
+      tmp.childNodes.forEach(k => add(k, el));
+    }
+    stream.lastElementChild.classList.add('live');
+  }
+  document.getElementById('replay').addEventListener('click', play); play();
+</script>
+</body>
+</html>

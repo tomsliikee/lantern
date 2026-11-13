@@ -196,6 +196,52 @@
     padding-top: 28px;
 }
 
+/* The ask mode: a card of turns, the question above its answer. */
+.ms-ask {
+    padding: 18px 18px 20px;
+    border-radius: 22px;
+}
+
+.ms-ask-turn {
+    spacing: 10px;
+}
+
+.ms-ask-next {
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+.ms-ask-reply {
+    spacing: 12px;
+}
+
+.ms-ask-code {
+    padding: 14px 16px;
+    border-radius: 16px;
+}
+
+.ms-ask-dots {
+    spacing: 6px;
+    padding: 6px 0;
+}
+
+.ms-ask-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+}
+
+.ms-chip {
+    padding: 0 12px 0 8px;
+    height: 32px;
+    spacing: 6px;
+    border-radius: 9999px;
+}
+
+.ms-chip-icon {
+    icon-size: 18px;
+}
+
 .ms-preview {
     width: 280px;
     padding: 18px 18px 20px;
@@ -383,6 +429,32 @@
     color: #ba1a1a;
 }
 
+.ms-root-light .ms-ask {
+    background-color: #f4f4f6;
+    color: #0c0c0e;
+}
+
+.ms-root-light .ms-ask-next {
+    border-top: 1px solid #e0e0e4;
+}
+
+.ms-root-light .ms-ask-said {
+    color: #5e5e64;
+}
+
+.ms-root-light .ms-ask-code {
+    background-color: #e6e6ea;
+}
+
+.ms-root-light .ms-ask-dot {
+    background-color: #5e5e64;
+}
+
+.ms-root-light .ms-chip {
+    background-color: #ffffff;
+    color: #0c0c0e;
+}
+
 .ms-root-dark #trough {
     background-color: transparent;
 }
@@ -514,4 +586,30 @@
 
 .ms-root-dark .ms-error {
     color: #ff8a80;
+}
+
+.ms-root-dark .ms-ask {
+    background-color: #161618;
+    color: #f5f5f7;
+}
+
+.ms-root-dark .ms-ask-next {
+    border-top: 1px solid #2c2c30;
+}
+
+.ms-root-dark .ms-ask-said {
+    color: #a1a1a6;
+}
+
+.ms-root-dark .ms-ask-code {
+    background-color: #26262a;
+}
+
+.ms-root-dark .ms-ask-dot {
+    background-color: #a1a1a6;
+}
+
+.ms-root-dark .ms-chip {
+    background-color: #1c1c1e;
+    color: #f5f5f7;
 }

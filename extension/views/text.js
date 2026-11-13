@@ -15,6 +15,7 @@ const CHANNEL = 257;
 
 const sans = (size, line, weight, tracking = 0) => ({size, line, weight, tracking, serif: false});
 const serif = (size, line, tracking) => ({size, line, weight: 400, tracking, serif: true});
+const mono = (size, line) => ({size, line, weight: 400, tracking: 0, serif: false, mono: true});
 
 // The roles of the design system, and the cuts the launcher's design asks
 // for beside them. Geist Serif has one weight and carries the statements:
@@ -44,6 +45,11 @@ const ROLES = {
     meta: sans(13, 18, 400),
     'meta-title': sans(14, 18, 600),
     glyph: sans(16, 20, 600),
+    // The ask mode: the question in the serif, the answer in Inter.
+    'ask-said': serif(20, 26, -0.2),
+    'ask-reply': sans(15, 24, 400),
+    'ask-code': mono(13, 20),
+    chip: sans(13, 18, 600),
 };
 
 // The weight of the matched letters.
@@ -57,11 +63,11 @@ export function description(role, weight = null) {
         return descriptions.get(key);
     const spec = ROLES[role] ?? ROLES.body;
     // Both stacks end in a generic family, so a missing font still draws.
-    const result = Pango.FontDescription.from_string(spec.serif ? serifFamily : family);
+    const result = Pango.FontDescription.from_string(spec.mono ? 'monospace' : spec.serif ? serifFamily : family);
     // Points, so the text follows the desktop's text scaling.
     result.set_size(Math.round(spec.size * PX_TO_PT * Pango.SCALE));
     // Inter's one axis; the serif has a single weight.
-    if (!spec.serif)
+    if (!spec.serif && !spec.mono)
         result.set_variations(`wght=${weight ?? spec.weight}`);
     descriptions.set(key, result);
     return result;

@@ -33,8 +33,10 @@ export default async function ({extension, settings, shot, sleep, note, move, pr
     extension._panel.close();
     await sleep(500);
     settings.set_boolean('see-through', before);
-    await click(800, 54);
+    await click(737, 54);
     await shot('prefs-2-sources');
-    await click(922, 54);
-    await shot('prefs-3-privacy');
+    await click(860, 54);
+    await shot('prefs-3-ask');
+    await click(983, 54);
+    await shot('prefs-4-privacy');
 }
