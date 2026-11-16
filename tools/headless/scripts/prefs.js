@@ -1,7 +1,7 @@
 // Opens the settings window, one page after the other, and checks that a
 // change made there reaches the running extension.
 // Where the See-through switch is in the maximised window (see prefs-1-general).
-const SWITCH = {x: 1050, y: 543};
+const SWITCH = {x: 1050, y: 689};
 export default async function ({extension, settings, shot, sleep, note, move, press, release}) {
     await sleep(1500);
     extension.openPreferences();

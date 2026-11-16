@@ -1,14 +1,14 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# This file is distributed under the same license as the material-search package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: material-search\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-12 19:52+0100\n"
+"POT-Creation-Date: 2026-11-15 15:45+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -36,356 +36,337 @@ msgstr ""
 msgid "Keep Ctrl+Space"
 msgstr ""
 
-#: extension/prefs.js:27 extension/sources/apps.js:45
+#: extension/prefs.js:30 extension/sources/apps.js:45
 msgid "Apps"
 msgstr ""
 
-#: extension/prefs.js:27
+#: extension/prefs.js:30
 msgid "Installed apps, by name, kind and keywords."
 msgstr ""
 
-#: extension/prefs.js:28 extension/sources/windows.js:21
+#: extension/prefs.js:31 extension/sources/windows.js:21
 msgid "Windows"
 msgstr ""
 
-#: extension/prefs.js:28
+#: extension/prefs.js:31
 msgid "Open windows, by title."
 msgstr ""
 
-#: extension/prefs.js:29 extension/sources/settings.js:17
+#: extension/prefs.js:32 extension/sources/settings.js:17
 #: extension/sources/settings.js:66 extension/sources/settings.js:76
 msgid "Settings"
 msgstr ""
 
-#: extension/prefs.js:29
+#: extension/prefs.js:32
 msgid "The panels of GNOME Settings."
 msgstr ""
 
-#: extension/prefs.js:30
+#: extension/prefs.js:33
 msgid "System actions"
 msgstr ""
 
-#: extension/prefs.js:30
+#: extension/prefs.js:33
 msgid ""
 "Lock, log out, suspend, restart, power off. The last three ask in GNOME’s "
 "own dialog."
 msgstr ""
 
-#: extension/prefs.js:31
+#: extension/prefs.js:34
 msgid "Calculator and units"
 msgstr ""
 
-#: extension/prefs.js:31
+#: extension/prefs.js:34
 msgid "Sums and conversions, worked out on this computer."
 msgstr ""
 
-#: extension/prefs.js:32
+#: extension/prefs.js:35
 msgid "Files by name"
 msgstr ""
 
-#: extension/prefs.js:32
+#: extension/prefs.js:35
 msgid "From LocalSearch, after two letters and a short pause."
 msgstr ""
 
-#: extension/prefs.js:117 extension/prefs.js:146
+#: extension/prefs.js:120 extension/prefs.js:149
 msgid "Shortcut"
 msgstr ""
 
-#: extension/prefs.js:118
+#: extension/prefs.js:121
 msgid "Press the keys"
 msgstr ""
 
-#: extension/prefs.js:118
+#: extension/prefs.js:121
 msgid "Escape leaves it as it is."
 msgstr ""
 
-#: extension/prefs.js:137
+#: extension/prefs.js:140
 msgid "General"
 msgstr ""
 
-#: extension/prefs.js:145
+#: extension/prefs.js:148
 msgid "Opening"
 msgstr ""
 
-#: extension/prefs.js:147
+#: extension/prefs.js:150
 msgid "None"
 msgstr ""
 
-#: extension/prefs.js:148
+#: extension/prefs.js:151
 msgid "Change"
 msgstr ""
 
-#: extension/prefs.js:156
+#: extension/prefs.js:159
 msgid "Super+Space"
 msgstr ""
 
-#: extension/prefs.js:183
+#: extension/prefs.js:186
 #, javascript-format
 msgid "Taken by GNOME as well (%s). Choose another, or free it there."
 msgstr ""
 
-#: extension/prefs.js:184
+#: extension/prefs.js:187
 msgid "Opens and closes the launcher."
 msgstr ""
 
-#: extension/prefs.js:188
+#: extension/prefs.js:191
 msgid "Taken from the input source switch; Shift+Super+Space still switches."
 msgstr ""
 
-#: extension/prefs.js:189
+#: extension/prefs.js:192
 msgid "Give back"
 msgstr ""
 
-#: extension/prefs.js:192
+#: extension/prefs.js:195
 msgid ""
 "Switches input sources now. Take it for the launcher; Shift+Super+Space "
 "keeps switching."
 msgstr ""
 
-#: extension/prefs.js:193
+#: extension/prefs.js:196
 msgid "Take"
 msgstr ""
 
-#: extension/prefs.js:205
+#: extension/prefs.js:208
+msgid "When nothing is found"
+msgstr ""
+
+#: extension/prefs.js:210
+msgid "Enter does"
+msgstr ""
+
+#: extension/prefs.js:211
+msgid "The first row when nothing matches. The others stay below."
+msgstr ""
+
+#: extension/prefs.js:212
+msgid "Search the web"
+msgstr ""
+
+#: extension/prefs.js:212 extension/views/panel.js:749
+msgid "Search in Files"
+msgstr ""
+
+#: extension/prefs.js:212
+msgid "Ask Claude"
+msgstr ""
+
+#: extension/prefs.js:212
+msgid "Ask agy"
+msgstr ""
+
+#: extension/prefs.js:212
+msgid "Ask Ollama"
+msgstr ""
+
+#: extension/prefs.js:219
 msgid "Look"
 msgstr ""
 
-#: extension/prefs.js:207
+#: extension/prefs.js:221
 msgid "Preview column"
 msgstr ""
 
-#: extension/prefs.js:208
+#: extension/prefs.js:222
 msgid "Beside the results, for the selected one."
 msgstr ""
 
-#: extension/prefs.js:209
+#: extension/prefs.js:223
 msgid "On wide screens"
 msgstr ""
 
-#: extension/prefs.js:209
+#: extension/prefs.js:223
 msgid "Always"
 msgstr ""
 
-#: extension/prefs.js:209
+#: extension/prefs.js:223
 msgid "Never"
 msgstr ""
 
-#: extension/prefs.js:214
+#: extension/prefs.js:228
 msgid "See-through"
 msgstr ""
 
-#: extension/prefs.js:214
+#: extension/prefs.js:228
 msgid "Lets the windows show through the panel."
 msgstr ""
 
-#: extension/prefs.js:220
+#: extension/prefs.js:231
 msgid "Blur like Blur My Shell"
 msgstr ""
 
-#: extension/prefs.js:220
-msgid "The panel takes the opacity Blur My Shell gives windows. Off: Lantern’s own."
+#: extension/prefs.js:231
+msgid ""
+"The panel takes the opacity Blur My Shell gives windows. Off: Lantern’s own."
 msgstr ""
 
-#: extension/prefs.js:219 extension/prefs.js:220
+#: extension/prefs.js:236 extension/prefs.js:237
 msgid "Motion"
 msgstr ""
 
-#: extension/prefs.js:220
+#: extension/prefs.js:237
 msgid ""
 "The pill scales in, the panel grows. Follows GNOME’s animation setting too."
 msgstr ""
 
-#: extension/prefs.js:222
+#: extension/prefs.js:239
 msgid "Calm on battery"
 msgstr ""
 
-#: extension/prefs.js:222
+#: extension/prefs.js:239
 msgid "On battery the panel simply appears."
 msgstr ""
 
-#: extension/prefs.js:231
+#: extension/prefs.js:248
 msgid "Sources"
 msgstr ""
 
-#: extension/prefs.js:232
+#: extension/prefs.js:249
 msgid "What is searched"
 msgstr ""
 
-#: extension/prefs.js:232
+#: extension/prefs.js:249
 msgid "Everything stays on this computer."
 msgstr ""
 
-#: extension/prefs.js:252
+#: extension/prefs.js:269
 msgid "Other apps"
 msgstr ""
 
-#: extension/prefs.js:253
+#: extension/prefs.js:270
 msgid ""
 "Apps that offer GNOME their own search. Each one is asked over D-Bus after "
 "the fast results, and left out when it takes longer than 300 ms."
 msgstr ""
 
-#: extension/prefs.js:257
+#: extension/prefs.js:274
 msgid "No app here offers a search."
 msgstr ""
 
-#: extension/prefs.js:272
+#: extension/prefs.js:289
 msgid "The web"
 msgstr ""
 
-#: extension/prefs.js:272
+#: extension/prefs.js:289
 msgid ""
 "Only when you choose “Search the web”: the text is handed to your browser."
 msgstr ""
 
-#: extension/prefs.js:274
+#: extension/prefs.js:291
 msgid "Search engine"
 msgstr ""
 
-#: extension/prefs.js:275
+#: extension/prefs.js:292
 msgid "Other"
 msgstr ""
 
-#: extension/prefs.js:278
+#: extension/prefs.js:295
 #, javascript-format
 msgid "Address, with %s for the search"
 msgstr ""
 
-#: extension/prefs.js:295
+#: extension/prefs.js:313
+msgid "Ask"
+msgstr ""
+
+#: extension/prefs.js:315
+msgid "Ask an AI"
+msgstr ""
+
+#: extension/prefs.js:316
+msgid "Claude and agy send your question to their service. Ollama stays here."
+msgstr ""
+
+#: extension/prefs.js:318
+msgid "Ask with a prefix"
+msgstr ""
+
+#: extension/prefs.js:318
+msgid ""
+"claude:, agy: and ollama: then a question, sent with Enter. Off: searched "
+"like any other text."
+msgstr ""
+
+#: extension/prefs.js:323
+msgid "Ollama"
+msgstr ""
+
+#: extension/prefs.js:323
+msgid "Loads while you type the prefix."
+msgstr ""
+
+#: extension/prefs.js:324
+msgid "Model"
+msgstr ""
+
+#: extension/prefs.js:329
+msgid "Installed"
+msgstr ""
+
+#: extension/prefs.js:329
+msgid "Looking…"
+msgstr ""
+
+#: extension/prefs.js:342
+msgid "No model yet. Pull one with “ollama pull”."
+msgstr ""
+
+#: extension/prefs.js:344
+msgid "Ollama is not reachable."
+msgstr ""
+
+#: extension/prefs.js:351
 msgid "Privacy"
 msgstr ""
 
-#: extension/prefs.js:297
+#: extension/prefs.js:353
 msgid "Ranking"
 msgstr ""
 
-#: extension/prefs.js:298
+#: extension/prefs.js:354
 msgid ""
 "What you open for what you typed is counted in ~/.local/share/material-"
 "search/usage.json, so it comes first next time. Counts fade over two weeks. "
 "Nothing leaves the computer."
 msgstr ""
 
-#: extension/prefs.js:300
+#: extension/prefs.js:356
 msgid "Rank by use"
 msgstr ""
 
-#: extension/prefs.js:302
+#: extension/prefs.js:358
 msgid "Forget what was opened"
 msgstr ""
 
-#: extension/prefs.js:303
+#: extension/prefs.js:359
 msgid "Forget"
 msgstr ""
 
-#: extension/prefs.js:306
+#: extension/prefs.js:362
 msgid "Forgotten."
 msgstr ""
 
-#: extension/views/panel.js:100
-msgid "Search anything"
-msgstr ""
-
-#: extension/views/panel.js:106
-msgid "Esc"
-msgstr ""
-
-#: extension/views/panel.js:126 extension/views/panel.js:463
-#: extension/sources/apps.js:153 extension/sources/apps.js:198
-#: extension/sources/files.js:257 extension/sources/files.js:297
-#: extension/sources/settings.js:78
-msgid "Open"
-msgstr ""
-
-#: extension/views/panel.js:144 extension/sources/actions.js:34
+#: extension/sources/actions.js:34 extension/views/panel.js:180
 msgid "Actions"
-msgstr ""
-
-#: extension/views/panel.js:433
-#, javascript-format
-msgid "Nothing here for “%s”"
-msgstr ""
-
-#: extension/views/panel.js:434
-msgid "No app, file or setting has that name."
-msgstr ""
-
-#: extension/views/panel.js:436
-msgid "Still looking through files…"
-msgstr ""
-
-#: extension/views/panel.js:438
-msgid "Nothing inside documents either."
-msgstr ""
-
-#: extension/views/panel.js:459
-msgid "Enter copies"
-msgstr ""
-
-#: extension/views/panel.js:459
-msgid "Worked out on this computer."
-msgstr ""
-
-#: extension/views/panel.js:501
-#, javascript-format
-msgid "Search the web for “%s”"
-msgstr ""
-
-#: extension/views/panel.js:503
-#, javascript-format
-msgid "Opens in %s"
-msgstr ""
-
-#: extension/views/panel.js:504
-msgid "Enter"
-msgstr ""
-
-#: extension/views/panel.js:514
-msgid "Search in Files"
-msgstr ""
-
-#: extension/views/panel.js:516
-msgid "Looks inside documents, slower"
-msgstr ""
-
-#: extension/views/panel.js:539
-msgid "Enter to look inside documents"
-msgstr ""
-
-#: extension/views/panel.js:539
-msgid "Enter to search the web"
-msgstr ""
-
-#: extension/views/panel.js:541
-msgid "Enter to copy"
-msgstr ""
-
-#: extension/views/panel.js:541 extension/views/panel.js:543
-#: extension/views/panel.js:545
-msgid "Tab for actions"
-msgstr ""
-
-#: extension/views/panel.js:543 extension/views/panel.js:545
-msgid "Enter to open"
-msgstr ""
-
-#: extension/views/panel.js:543
-msgid "Ctrl+Enter to show in folder"
-msgstr ""
-
-#: extension/views/panel.js:558
-#, javascript-format
-msgid "%d result in %d ms"
-msgid_plural "%d results in %d ms"
-msgstr[0] ""
-msgstr[1] ""
-
-#: extension/views/panel.js:627
-msgid "Enter to run"
-msgstr ""
-
-#: extension/views/panel.js:627
-msgid "Esc or Tab to go back"
 msgstr ""
 
 #: extension/sources/actions.js:75
@@ -412,6 +393,13 @@ msgid "App · %d window open"
 msgid_plural "App · %d windows open"
 msgstr[0] ""
 msgstr[1] ""
+
+#: extension/sources/apps.js:153 extension/sources/apps.js:198
+#: extension/sources/files.js:257 extension/sources/files.js:297
+#: extension/sources/settings.js:78 extension/views/panel.js:161
+#: extension/views/panel.js:685
+msgid "Open"
+msgstr ""
 
 #: extension/sources/apps.js:156 extension/sources/apps.js:200
 msgid "New window"
@@ -553,86 +541,138 @@ msgstr ""
 msgid "Close window"
 msgstr ""
 
-#: extension/views/panel.js
-#, c-format
+#: extension/views/panel.js:128 extension/views/panel.js:477
+msgid "Search anything"
+msgstr ""
+
+#: extension/views/panel.js:134
+msgid "Esc"
+msgstr ""
+
+#: extension/views/panel.js:454 extension/views/panel.js:758
+#, javascript-format
 msgid "Ask %s"
 msgstr ""
 
-#: extension/views/panel.js
+#: extension/views/panel.js:491
 msgid "Ask a follow-up"
 msgstr ""
 
-#: extension/views/panel.js
-#, c-format
+#: extension/views/panel.js:513
+#, javascript-format
 msgid "%s did not answer."
 msgstr ""
 
-#: extension/views/panel.js
-#, c-format
+#: extension/views/panel.js:515
+#, javascript-format
 msgid "%s sent nothing back."
 msgstr ""
 
-#: extension/views/panel.js
+#: extension/views/panel.js:522
 msgid "Esc to stop"
 msgstr ""
 
-#: extension/views/panel.js
+#: extension/views/panel.js:522
 msgid "Enter to ask a follow-up"
 msgstr ""
 
-#: extension/views/panel.js
+#: extension/views/panel.js:522
 msgid "Esc to go back"
 msgstr ""
 
-#: extension/views/panel.js
-#, c-format
+#: extension/views/panel.js:530
+#, javascript-format
 msgid "%s, %.1f s"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Ask"
+#: extension/views/panel.js:655
+#, javascript-format
+msgid "Nothing here for “%s”"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Ask an AI"
+#: extension/views/panel.js:656
+msgid "No app, file or setting has that name."
 msgstr ""
 
-#: extension/prefs.js
-msgid "Claude and agy send your question to their service. Ollama stays here."
+#: extension/views/panel.js:658
+msgid "Still looking through files…"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Ask with a prefix"
+#: extension/views/panel.js:660
+msgid "Nothing inside documents either."
 msgstr ""
 
-#: extension/prefs.js
-msgid "claude:, agy: and ollama: then a question, sent with Enter. Off: searched like any other text."
+#: extension/views/panel.js:681
+msgid "Enter copies"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Ollama"
+#: extension/views/panel.js:681
+msgid "Worked out on this computer."
 msgstr ""
 
-#: extension/prefs.js
-msgid "Loads while you type the prefix."
+#: extension/views/panel.js:725
+msgid "Enter"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Model"
+#: extension/views/panel.js:740
+#, javascript-format
+msgid "Search the web for “%s”"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Installed"
+#: extension/views/panel.js:741
+#, javascript-format
+msgid "Opens in %s"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Looking…"
+#: extension/views/panel.js:750
+msgid "Looks inside documents, slower"
 msgstr ""
 
-#: extension/prefs.js
-msgid "No model yet. Pull one with “ollama pull”."
+#: extension/views/panel.js:778
+#, javascript-format
+msgid "Enter to ask %s"
 msgstr ""
 
-#: extension/prefs.js
-msgid "Ollama is not reachable."
+#: extension/views/panel.js:778
+msgid "↑↓ for the others"
+msgstr ""
+
+#: extension/views/panel.js:780
+msgid "Enter to look inside documents"
+msgstr ""
+
+#: extension/views/panel.js:780
+msgid "Enter to search the web"
+msgstr ""
+
+#: extension/views/panel.js:782
+msgid "Enter to copy"
+msgstr ""
+
+#: extension/views/panel.js:782 extension/views/panel.js:784
+#: extension/views/panel.js:786
+msgid "Tab for actions"
+msgstr ""
+
+#: extension/views/panel.js:784 extension/views/panel.js:786
+msgid "Enter to open"
+msgstr ""
+
+#: extension/views/panel.js:784
+msgid "Ctrl+Enter to show in folder"
+msgstr ""
+
+#: extension/views/panel.js:799
+#, javascript-format
+msgid "%d result in %d ms"
+msgid_plural "%d results in %d ms"
+msgstr[0] ""
+msgstr[1] ""
+
+#: extension/views/panel.js:878
+msgid "Enter to run"
+msgstr ""
+
+#: extension/views/panel.js:878
+msgid "Esc or Tab to go back"
 msgstr ""

@@ -27,6 +27,8 @@ import {Panel} from './views/panel.js';
 import {Theme} from './views/theme.js';
 
 const SHORTCUT = 'toggle-shortcut';
+// The Islands extension; Lantern grows out of its island when it lends it.
+const ISLANDS = 'islands@thomashaiden';
 const SUPER_SPACE = '<Super>space';
 const CTRL_SPACE = '<Control>space';
 const INPUT_SCHEMA = 'org.gnome.desktop.wm.keybindings';
@@ -125,7 +127,28 @@ export default class MaterialSearchExtension extends Extension {
             Main.overview.hide();
         else if (Main.modalCount > 0)
             return;
+        // With the Islands extension's island showing, Lantern grows out
+        // of it (Islands decides whether it lends its island).
+        const anchor = Main.extensionManager.lookup(ISLANDS)?.stateObj?.lanternAnchor?.() ?? null;
+        if (anchor) {
+            this._panel.openFrom(anchor.rect, anchor.onClosed);
+            return;
+        }
         this._panel.open();
+    }
+
+    // Opens growing out of `rect` ({x, y, width, height}); onClosed() once
+    // it has shrunk back into it. Returns whether it opened. For the
+    // Islands extension, which calls it on a click on its empty island.
+    openFrom(rect, {onClosed = null} = {}) {
+        if (this._panel.isOpen)
+            return false;
+        if (Main.overview.visible)
+            Main.overview.hide();
+        else if (Main.modalCount > 0)
+            return false;
+        this._panel.openFrom(rect, onClosed);
+        return true;
     }
 
     // On the first enable: Super+Space also switches input sources. The

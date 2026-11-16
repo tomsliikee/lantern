@@ -88,7 +88,7 @@ export class CapsuleBlur {
         const follow = () => {
             this._holder.set_scale(this._capsule.scale_x, this._capsule.scale_y);
             this._holder.opacity = this._capsule.opacity;
-            this._pipeline?.set_corner_radius(this._radius());
+                this._pipeline?.set_corner_radius(this._radius());
             this.refresh();
         };
         this._capsuleIds = ['notify::scale-x', 'notify::opacity', 'notify::height', 'style-changed']
@@ -104,6 +104,15 @@ export class CapsuleBlur {
         }
 
         this._capsule.add_style_class_name('ms-blurred');
+        this.refresh();
+    }
+
+    follow() {
+        if (!this._pipeline)
+            return;
+        this._holder.set_scale(this._capsule.scale_x, this._capsule.scale_y);
+        this._holder.opacity = this._capsule.opacity;
+        this._pipeline.set_corner_radius(this._radius());
         this.refresh();
     }
 

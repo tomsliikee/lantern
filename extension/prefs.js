@@ -10,6 +10,7 @@ import Soup from 'gi://Soup?version=3.0';
 import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 import {OLLAMA_URL} from './lib/ai.js';
+import {FALLBACKS} from './lib/fallback.js';
 import {installedProviders} from './lib/providerlist.js';
 import {conflicts, normalize} from './lib/shortcut.js';
 import {colors, serifFamily, sizes} from './lib/tokens.js';
@@ -203,6 +204,17 @@ function generalPage(settings, window) {
     input.connect(`changed::${INPUT_KEY}`, refreshShortcut);
     refreshShortcut();
     page.add(opening);
+
+    const nothing = new Adw.PreferencesGroup({title: _('When nothing is found')});
+    const enterDoes = new Adw.ComboRow({
+        title: _('Enter does'),
+        subtitle: _('The first row when nothing matches. The others stay below.'),
+        model: Gtk.StringList.new([_('Search the web'), _('Search in Files'), _('Ask Claude'), _('Ask agy'), _('Ask Ollama')]),
+    });
+    enterDoes.selected = Math.max(0, FALLBACKS.indexOf(settings.get_string('nothing-found')));
+    enterDoes.connect('notify::selected', () => settings.set_string('nothing-found', FALLBACKS[enterDoes.selected]));
+    nothing.add(enterDoes);
+    page.add(nothing);
 
     const look = new Adw.PreferencesGroup({title: _('Look')});
     const compact = new Adw.ComboRow({

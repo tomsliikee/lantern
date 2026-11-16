@@ -69,6 +69,18 @@
       <default>''</default>
       <summary>Address of a custom search engine, with %s for the query</summary>
     </key>
+    <key name="nothing-found" type="s">
+      <choices>
+        <choice value="web"/>
+        <choice value="files"/>
+        <choice value="claude"/>
+        <choice value="agy"/>
+        <choice value="ollama"/>
+      </choices>
+      <default>'web'</default>
+      <summary>What Enter does when nothing is found</summary>
+      <description>The first, selected row when no app, file or setting matches; the other choices stay below it. An AI choice while the ai switch is off, or files while the files source is off, falls back to web.</description>
+    </key>
     <key name="ai" type="b">
       <default>true</default>
       <summary>Ask Claude, agy or Ollama with a prefix</summary>

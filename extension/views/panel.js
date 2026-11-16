@@ -16,7 +16,8 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import {ensureActorVisibleInScrollView} from 'resource:///org/gnome/shell/misc/animationUtils.js';
 import {gettext as _, ngettext} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-import {parsePrefix} from '../lib/ai.js';
+import {PROVIDERS, parsePrefix} from '../lib/ai.js';
+import {fallbackOrder} from '../lib/fallback.js';
 import {flatten} from '../lib/rank.js';
 import {SPRINGS} from '../lib/spring.js';
 import {searchUrl} from '../lib/format.js';
@@ -39,6 +40,9 @@ const ROOMY_MONITOR = 1400;
 const GUTTER = 16;
 // Where the panel's top sits, as a share of the monitor's height.
 const TOP_SHARE = 0.18;
+// Opened from an anchor (the Islands extension's island): how far below
+// the anchor's top edge the capsule's top sits once it has grown.
+const ANCHOR_TOP = 0;
 const GROUPS = 8;
 const ROWS_PER_GROUP = 6;
 const PAGE = 5;
@@ -73,6 +77,8 @@ export class Panel {
         this._runner = new AskRunner({onEvent: event => this._askEvent(event)});
         this._scheme = null;
         this._isOpen = false;
+        // Whether Ollama was warmed for a fallback row in this opening.
+        this._warmed = false;
         this._grab = null;
         this._lone = true;
         this._compact = false;
@@ -85,6 +91,11 @@ export class Panel {
         this._closing = false;
         this._debug = Boolean(GLib.getenv('MATERIAL_SEARCH_DEBUG'));
         this._build();
+        // Opened from an anchor: {rect, onClosed} while it is, else null.
+        // The capsule grows out of the rectangle on one spring (x, y,
+        // width, height) and shrinks back into it when it closes.
+        this._anchor = null;
+        this._anchorSpring = new Spring(this._capsule, value => this._anchorFrame(value), ARRIVE, 0.005);
         // Only while Blur My Shell is enabled; otherwise nothing is added.
         this._blur = new CapsuleBlur(this._backdrop, this._capsule, settings, () => this._scheme);
         // Switching AI off ends a conversation that is open.
@@ -292,7 +303,9 @@ export class Panel {
         this._capsule.width = width;
         this._capsule.set_position(
             Math.round(monitor.x + (monitor.width - width) / 2),
-            Math.round(monitor.y + monitor.height * TOP_SHARE));
+            this._anchor
+                ? Math.round(this._anchor.rect.y + ANCHOR_TOP)
+                : Math.round(monitor.y + monitor.height * TOP_SHARE));
         this._side.visible = !this._compact;
         // A compact sheet hides the results; leaving it any other way than
         // Esc must not leave them hidden.
@@ -331,6 +344,7 @@ export class Panel {
         this._grab = Main.pushModal(this._backdrop, {actionMode: Shell.ActionMode.POPUP});
         mark('grab');
         this._isOpen = true;
+        this._warmed = false;
         this._entry.grab_key_focus();
         if (animate) {
             this._fadeSpring.set(0);
@@ -342,6 +356,66 @@ export class Panel {
             this._openSpring.set(1);
         }
         this._onOpened?.(started);
+    }
+
+    // Opens growing out of `rect` ({x, y, width, height} in stage
+    // coordinates), the capsule's top under the rectangle's top instead of
+    // at TOP_SHARE. onClosed() is called once the capsule has shrunk back
+    // into the rectangle (or the panel closed without motion).
+    openFrom(rect, onClosed = null) {
+        if (this._isOpen)
+            return;
+        // Still shrinking from the last time (the shortcut pressed twice in
+        // a row): finish that first, so open() does not drop the new anchor
+        // and call its onClosed at once.
+        if (this._closing)
+            this._finishClose({notify: false});
+        this._anchor = {rect, onClosed};
+        const animate = this._motion();
+        this.open({animate: false});
+        // Where it grows to: the place and size open() gave it.
+        const [x, y] = this._capsule.get_position();
+        const [, height] = this._capsule.get_preferred_height(this._width);
+        this._anchor.to = {x, y, width: this._width, height};
+        if (!animate) {
+            this._anchorFrame(1);
+            return;
+        }
+        this._column.clip_to_allocation = true;
+        this._anchorSpring.set(0);
+        this._anchorSpring.to(1, () => this._anchorDone());
+    }
+
+    // One frame of the way between the anchor (0) and the panel (1). The
+    // content shows only once the capsule is wide enough to hold it.
+    _anchorFrame(value) {
+        const anchor = this._anchor;
+        if (!anchor?.to)
+            return;
+        const {rect, to} = anchor;
+        const at = (a, b) => Math.round(a + (b - a) * value);
+        this._capsule.set_position(at(rect.x, to.x), at(rect.y, to.y));
+        this._capsule.set_size(Math.max(1, at(rect.width, to.width)), Math.max(1, at(rect.height, to.height)));
+        const share = Math.min(1, Math.max(0, (value - 0.45) / 0.45));
+        this._column.opacity = Math.round(255 * share);
+        // Not painted at all in a sliver: pango crashed the shell there.
+        const shown = share > 0;
+        if (shown !== this._column.visible) {
+            this._column.visible = shown;
+            // Focus is lost while the field is hidden; Esc needs it back.
+            if (shown && this._isOpen)
+                this._entry.grab_key_focus();
+        }
+        this._blur.follow();
+    }
+
+    _anchorDone() {
+        this._column.clip_to_allocation = false;
+        this._capsule.height = -1;
+        this._column.opacity = 255;
+        this._column.visible = true;
+        this._blur.follow();
+        this._backdrop.queue_redraw();
     }
 
     close() {
@@ -358,7 +432,17 @@ export class Panel {
         this._openSpring.stop();
         this._fadeSpring.stop();
         this._growSpring.stop();
-        if (this._motion()) {
+        if (this._anchor?.to && this._motion()) {
+            // Back into the anchor, then the anchor's owner shows it again.
+            this._closing = true;
+            this._column.clip_to_allocation = true;
+            this._anchor.to = {...this._anchor.to, height: this._capsule.height};
+            this._anchorSpring.set(1);
+            this._anchorSpring.to(0, () => {
+                if (this._closing)
+                    this._finishClose();
+            });
+        } else if (this._motion()) {
             this._closing = true;
             this._capsule.ease({
                 opacity: 0,
@@ -376,8 +460,18 @@ export class Panel {
         }
     }
 
-    _finishClose() {
+    _finishClose({notify = true} = {}) {
         this._closing = false;
+        this._anchorSpring.stop();
+        this._column.clip_to_allocation = false;
+        this._column.opacity = 255;
+        this._column.visible = true;
+        const anchor = this._anchor;
+        this._anchor = null;
+        // The anchor's springs gave the capsule a fixed size; it takes its
+        // natural height again (the width comes with the next _layout).
+        if (anchor)
+            this._capsule.height = -1;
         this._capsule.remove_all_transitions();
         this._body.remove_all_transitions();
         this._foot.remove_all_transitions();
@@ -395,6 +489,8 @@ export class Panel {
         this._clearResults();
         this._setLone(true, false);
         this._closedHook?.();
+        if (notify)
+            anchor?.onClosed?.();
         // Written once per closing, after the panel is gone.
         if (!this._saveIdle) {
             this._saveIdle = GLib.idle_add(GLib.PRIORITY_LOW, () => {
@@ -710,34 +806,51 @@ export class Panel {
         this._setLone(false, true);
     }
 
-    // When nothing matches: the web, and the slower look inside documents.
+    // When nothing matches: the web, the slower look inside documents and
+    // the AIs, the one chosen in the settings first.
     _fallback(query, info) {
-        const browser = Gio.AppInfo.get_default_for_uri_scheme('https');
-        const rows = [{
-            id: 'fallback:web',
-            kind: 'web',
-            title: _('Search the web for “%s”').format(query),
-            positions: [],
-            subtitle: browser ? _('Opens in %s').format(browser.get_name()) : '',
-            trail: _('Enter'),
-            icon: {gicon: icon('globe')},
-            activate: () => this._searchWeb(query),
-            actions: () => [],
-            preview: null,
-        }];
-        if (this._files() && !info.content) {
-            rows.push({
-                id: 'fallback:content',
-                kind: 'content-search',
-                title: _('Search in Files'),
-                positions: [],
-                subtitle: _('Looks inside documents, slower'),
-                icon: {gicon: icon('file')},
-                actions: () => [],
-                preview: null,
-            });
+        const order = fallbackOrder(this._settings.get_string('nothing-found'), {
+            ai: this._settings.get_boolean('ai'),
+            files: Boolean(this._files()) && !info.content,
+        });
+        const rows = order.map(id => this._fallbackRow(id, query));
+        rows[0].trail = _('Enter');
+        // Ollama first: the model loads while the question is still read.
+        if (order[0] === 'ollama' && !this._warmed) {
+            this._warmed = true;
+            this._runner.warm(this._settings.get_string('ollama-model'));
         }
         return rows;
+    }
+
+    _fallbackRow(id, query) {
+        const row = {id: `fallback:${id}`, positions: [], subtitle: '', actions: () => [], preview: null};
+        if (id === 'web') {
+            const browser = Gio.AppInfo.get_default_for_uri_scheme('https');
+            return Object.assign(row, {
+                kind: 'web',
+                title: _('Search the web for “%s”').format(query),
+                subtitle: browser ? _('Opens in %s').format(browser.get_name()) : '',
+                icon: {gicon: icon('globe')},
+                activate: () => this._searchWeb(query),
+            });
+        }
+        if (id === 'files') {
+            return Object.assign(row, {
+                kind: 'content-search',
+                title: _('Search in Files'),
+                subtitle: _('Looks inside documents, slower'),
+                icon: {gicon: icon('file')},
+            });
+        }
+        const provider = PROVIDERS[id];
+        return Object.assign(row, {
+            kind: 'ask',
+            provider,
+            title: _('Ask %s').format(provider.name),
+            subtitle: provider.http ? this._settings.get_string('ollama-model') : '',
+            icon: {gicon: icon('spark')},
+        });
     }
 
     _searchWeb(query) {
@@ -753,7 +866,9 @@ export class Panel {
     _footer(info, empty) {
         const current = this._rows[this._selected];
         let hints;
-        if (empty)
+        if (empty && current?.kind === 'ask')
+            hints = [_('Enter to ask %s').format(current.provider.name), _('↑↓ for the others')];
+        else if (empty)
             hints = current?.kind === 'content-search' ? [_('Enter to look inside documents')] : [_('Enter to search the web')];
         else if (current?.kind === 'answer')
             hints = [_('Enter to copy'), _('Tab for actions')];
@@ -824,6 +939,13 @@ export class Panel {
             return;
         if (item.kind === 'content-search') {
             this._search.searchContent(this._files());
+            return;
+        }
+        // Nothing was found: the question goes to the AI as if its prefix
+        // had been typed, and is sent at once.
+        if (item.kind === 'ask') {
+            this._enterAsk(item.provider, this._entry.get_text().trim());
+            this._askSend();
             return;
         }
         const query = this._entry.get_text();
