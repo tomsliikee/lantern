@@ -42,7 +42,7 @@ export default class MaterialSearchExtension extends Extension {
         this._usage = new Usage();
         this._usage.learning = this._settings.get_boolean('learn');
         this._power = new Power();
-        this._theme = new Theme();
+        this._theme = new Theme(this._settings);
 
         const history = this._usage;
         this._sources = {

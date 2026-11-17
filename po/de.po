@@ -689,3 +689,19 @@ msgstr "Enter führt aus"
 #: extension/views/panel.js:878
 msgid "Esc or Tab to go back"
 msgstr "Esc oder Tab geht zurück"
+
+#: extension/prefs.js
+msgid "Colour scheme"
+msgstr "Farbschema"
+
+#: extension/prefs.js
+msgid "Of the panel. System: light or dark as the desktop is."
+msgstr "Des Panels. System: hell oder dunkel wie der Desktop."
+
+#: extension/prefs.js
+msgid "Light"
+msgstr "Hell"
+
+#: extension/prefs.js
+msgid "Dark"
+msgstr "Dunkel"

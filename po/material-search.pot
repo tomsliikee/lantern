@@ -676,3 +676,19 @@ msgstr ""
 #: extension/views/panel.js:878
 msgid "Esc or Tab to go back"
 msgstr ""
+
+#: extension/prefs.js
+msgid "Colour scheme"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Of the panel. System: light or dark as the desktop is."
+msgstr ""
+
+#: extension/prefs.js
+msgid "Light"
+msgstr ""
+
+#: extension/prefs.js
+msgid "Dark"
+msgstr ""

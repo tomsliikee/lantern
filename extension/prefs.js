@@ -39,6 +39,7 @@ const ENGINES = [
     ['ecosia', 'Ecosia'], ['bing', 'Bing'], ['custom', null],
 ];
 const COMPACT = ['auto', 'never', 'always'];
+const SCHEMES = ['system', 'light', 'dark'];
 
 // The Mono look for the window: its grounds and cards from the design
 // system's colours, light or dark as the desktop is, the serif for the
@@ -217,6 +218,14 @@ function generalPage(settings, window) {
     page.add(nothing);
 
     const look = new Adw.PreferencesGroup({title: _('Look')});
+    const scheme = new Adw.ComboRow({
+        title: _('Colour scheme'),
+        subtitle: _('Of the panel. System: light or dark as the desktop is.'),
+        model: Gtk.StringList.new([_('System'), _('Light'), _('Dark')]),
+    });
+    scheme.selected = Math.max(0, SCHEMES.indexOf(settings.get_string('scheme')));
+    scheme.connect('notify::selected', () => settings.set_string('scheme', SCHEMES[scheme.selected]));
+    look.add(scheme);
     const compact = new Adw.ComboRow({
         title: _('Preview column'),
         subtitle: _('Beside the results, for the selected one.'),

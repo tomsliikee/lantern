@@ -25,6 +25,16 @@
       <summary>Leave out the preview column</summary>
       <description>auto: on a screen narrower than 1400 logical pixels; always; never.</description>
     </key>
+    <key name="scheme" type="s">
+      <choices>
+        <choice value="system"/>
+        <choice value="light"/>
+        <choice value="dark"/>
+      </choices>
+      <default>'system'</default>
+      <summary>Colour scheme of the panel</summary>
+      <description>system: light or dark as the desktop is; light; dark.</description>
+    </key>
     <key name="see-through" type="b">
       <default>false</default>
       <summary>See-through</summary>
