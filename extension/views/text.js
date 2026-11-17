@@ -99,16 +99,26 @@ function byteOffsets(text) {
 
 function apply(label) {
     const spec = label._msText;
-    if (!spec)
+    // A label that is being torn down is not styled or drawn again; building
+    // attributes for it only races with its destruction.
+    if (!spec || label._msGone)
         return;
     const attributes = new Pango.AttrList();
-    attributes.insert(Pango.attr_font_desc_new(description(spec.role)));
-    attributes.insert(Pango.attr_font_features_new('tnum=1'));
+    // Every attribute is also kept in this list: the label holds on to it
+    // while the text draws with them, so the script's garbage collector
+    // cannot free them under the paint.
+    const parts = [];
+    const add = attribute => {
+        parts.push(attribute);
+        attributes.insert(attribute);
+    };
+    add(Pango.attr_font_desc_new(description(spec.role)));
+    add(Pango.attr_font_features_new('tnum=1'));
     const role = ROLES[spec.role] ?? ROLES.body;
     if (role.tracking)
-        attributes.insert(Pango.attr_letter_spacing_new(Math.round(role.tracking * Pango.SCALE)));
+        add(Pango.attr_letter_spacing_new(Math.round(role.tracking * Pango.SCALE)));
     if (role.line)
-        attributes.insert(Pango.attr_line_height_new_absolute(Math.round(role.line * Pango.SCALE)));
+        add(Pango.attr_line_height_new_absolute(Math.round(role.line * Pango.SCALE)));
     if (spec.positions?.length > 0 && !ROLES[spec.role]?.serif) {
         const offsets = byteOffsets(spec.text);
         const heavy = description(spec.role, MATCH_WEIGHT);
@@ -121,7 +131,7 @@ function apply(label) {
             const attribute = Pango.attr_font_desc_new(heavy);
             attribute.start_index = offsets[start];
             attribute.end_index = offsets[previous + 1];
-            attributes.insert(attribute);
+            add(attribute);
         };
         for (const at of spec.positions) {
             if (at >= spec.text.length)
@@ -139,11 +149,12 @@ function apply(label) {
     // otherwise, so the stylesheet's colour is passed on.
     if (label.get_stage()) {
         const color = label.get_theme_node().get_foreground_color();
-        attributes.insert(Pango.attr_foreground_new(color.red * CHANNEL, color.green * CHANNEL, color.blue * CHANNEL));
+        add(Pango.attr_foreground_new(color.red * CHANNEL, color.green * CHANNEL, color.blue * CHANNEL));
         if (color.alpha < 255)
-            attributes.insert(Pango.attr_foreground_alpha_new(color.alpha * CHANNEL));
+            add(Pango.attr_foreground_alpha_new(color.alpha * CHANNEL));
     }
     label.clutter_text.set_attributes(attributes);
+    label._msAttributes = {list: attributes, parts};
 }
 
 export function label(role, {style_class = '', expand = false, align = Clutter.ActorAlign.START, wrap = false, ellipsize = true} = {}) {
@@ -161,6 +172,7 @@ export function label(role, {style_class = '', expand = false, align = Clutter.A
         actor.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
     }
     actor.connect_after('style-changed', () => apply(actor));
+    actor.connect('destroy', () => (actor._msGone = true));
     apply(actor);
     return actor;
 }
@@ -185,19 +197,27 @@ export function setText(actor, text, {positions = null, role = null} = {}) {
 // on every style change, so it is set again after that. Returns a function
 // that changes the role later.
 export function styleEntry(entry, role) {
+    let gone = false;
     const set = () => {
+        if (gone)
+            return;
         entry.clutter_text.set_font_description(description(role));
         const attributes = new Pango.AttrList();
+        const parts = [];
         const tracking = (ROLES[role] ?? ROLES.body).tracking;
         if (tracking)
-            attributes.insert(Pango.attr_letter_spacing_new(Math.round(tracking * Pango.SCALE)));
+            parts.push(Pango.attr_letter_spacing_new(Math.round(tracking * Pango.SCALE)));
         // An attribute list drops the colour of the stylesheet otherwise.
         if (entry.get_stage()) {
             const color = entry.get_theme_node().get_foreground_color();
-            attributes.insert(Pango.attr_foreground_new(color.red * CHANNEL, color.green * CHANNEL, color.blue * CHANNEL));
+            parts.push(Pango.attr_foreground_new(color.red * CHANNEL, color.green * CHANNEL, color.blue * CHANNEL));
         }
+        for (const part of parts)
+            attributes.insert(part);
         entry.clutter_text.set_attributes(attributes);
+        entry._msAttributes = {list: attributes, parts};
     };
+    entry.connect('destroy', () => (gone = true));
     entry.connect_after('style-changed', set);
     set();
     return next => {
