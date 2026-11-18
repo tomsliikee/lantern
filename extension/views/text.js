@@ -1,10 +1,11 @@
 // Labels set in a type role, with the matched letters in a heavier cut.
 //
-// St's CSS cannot reach the axes of a variable font (weight), so
-// the role is applied as Pango attributes. St replaces a label's attributes
-// whenever its style is recomputed, so they are applied again after that.
+// St's CSS cannot reach the axes of a variable font (weight), so the role
+// is applied as Pango attributes. St replaces a label's attributes whenever
+// its style is recomputed, so they are applied again after that.
 
 import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
 import St from 'gi://St';
 
@@ -73,80 +74,71 @@ export function description(role, weight = null) {
     return result;
 }
 
-// Byte offsets of each character, for Pango's indices.
-function byteOffsets(text) {
-    const offsets = [];
-    let bytes = 0;
-    for (let i = 0; i < text.length; i++) {
-        offsets.push(bytes);
-        const code = text.charCodeAt(i);
-        if (code < 0x80)
-            bytes += 1;
-        else if (code < 0x800)
-            bytes += 2;
-        else if (code >= 0xd800 && code <= 0xdbff) {
-            // A pair of surrogates is one character of four bytes; its
-            // second half points past it.
-            bytes += 4;
-            i++;
-            offsets.push(bytes);
-        } else
-            bytes += 3;
+const escape = text => GLib.markup_escape_text(text, -1);
+const hex2 = v => v.toString(16).padStart(2, '0');
+
+// The label's role as Pango markup. Pango parses it into an attribute list
+// in C, so no Pango.Attribute is ever made or held by JS; the attributes
+// built from JS before were the likeliest cause of the shell crashing under
+// the paint (SIGSEGV in pango_attr_list_copy).
+function markupOf(spec, color) {
+    const role = ROLES[spec.role] ?? ROLES.body;
+    const outer = [`font="${escape(description(spec.role).to_string())}"`, 'font_features="tnum=1"'];
+    if (role.tracking)
+        outer.push(`letter_spacing="${Math.round(role.tracking * Pango.SCALE)}"`);
+    if (role.line)
+        outer.push(`line_height="${Math.round(role.line * Pango.SCALE)}"`);
+    // Heavy cuts of the variable font are drawn without the label's colour
+    // otherwise, so the stylesheet's colour is passed on.
+    if (color) {
+        outer.push(`foreground="#${hex2(color.red)}${hex2(color.green)}${hex2(color.blue)}"`);
+        if (color.alpha < 255)
+            outer.push(`fgalpha="${Math.max(1, color.alpha * CHANNEL)}"`);
     }
-    offsets.push(bytes);
-    return offsets;
+    const text = spec.text;
+    let body = escape(text);
+    if (spec.positions?.length > 0 && !role.serif) {
+        const heavy = `<span font="${escape(description(spec.role, MATCH_WEIGHT).to_string())}">`;
+        const marked = new Set(spec.positions);
+        body = '';
+        let inRun = false;
+        for (let i = 0; i < text.length; i++) {
+            // A pair of surrogates is one character and is never split.
+            const pair = text.charCodeAt(i) >= 0xd800 && text.charCodeAt(i) <= 0xdbff;
+            const ch = pair ? text.slice(i, i + 2) : text[i];
+            const on = marked.has(i);
+            if (on !== inRun) {
+                body += on ? heavy : '</span>';
+                inRun = on;
+            }
+            body += escape(ch);
+            if (pair)
+                i++;
+        }
+        if (inRun)
+            body += '</span>';
+    }
+    return `<span ${outer.join(' ')}>${body}</span>`;
 }
 
 function apply(label) {
     const spec = label._msText;
-    // A label that is being torn down is not styled or drawn again; building
-    // attributes for it only races with its destruction.
+    // A label that is being torn down is not styled or drawn again.
     if (!spec || label._msGone || !label.clutter_text)
         return;
-    const attributes = new Pango.AttrList();
-    attributes.insert(Pango.attr_font_desc_new(description(spec.role)));
-    attributes.insert(Pango.attr_font_features_new('tnum=1'));
-    const role = ROLES[spec.role] ?? ROLES.body;
-    if (role.tracking)
-        attributes.insert(Pango.attr_letter_spacing_new(Math.round(role.tracking * Pango.SCALE)));
-    if (role.line)
-        attributes.insert(Pango.attr_line_height_new_absolute(Math.round(role.line * Pango.SCALE)));
-    if (spec.positions?.length > 0 && !ROLES[spec.role]?.serif) {
-        const offsets = byteOffsets(spec.text);
-        const heavy = description(spec.role, MATCH_WEIGHT);
-        // Neighbouring letters become one run.
-        let start = null;
-        let previous = null;
-        const flush = () => {
-            if (start === null)
-                return;
-            const attribute = Pango.attr_font_desc_new(heavy);
-            attribute.start_index = offsets[start];
-            attribute.end_index = offsets[previous + 1];
-            attributes.insert(attribute);
-        };
-        for (const at of spec.positions) {
-            if (at >= spec.text.length)
-                continue;
-            if (start !== null && at === previous + 1) {
-                previous = at;
-                continue;
-            }
-            flush();
-            start = previous = at;
-        }
-        flush();
+    const color = label.get_stage() ? label.get_theme_node().get_foreground_color() : null;
+    const markup = markupOf(spec, color);
+    if (markup !== label._msMarkup) {
+        const [ok, attributes] = Pango.parse_markup(markup, -1, '\0');
+        if (!ok)
+            return;
+        label._msMarkup = markup;
+        label._msAttributes = attributes;
     }
-    // Heavy cuts of the variable font are drawn without the label's colour
-    // otherwise, so the stylesheet's colour is passed on.
-    if (label.get_stage()) {
-        const color = label.get_theme_node().get_foreground_color();
-        attributes.insert(Pango.attr_foreground_new(color.red * CHANNEL, color.green * CHANNEL, color.blue * CHANNEL));
-        if (color.alpha < 255)
-            attributes.insert(Pango.attr_foreground_alpha_new(color.alpha * CHANNEL));
-    }
-    label.clutter_text.set_attributes(attributes);
-    label._msAttributes = attributes;
+    // St replaces a label's attributes whenever its style is recomputed, so
+    // they are set again after that. set_attributes (not set_markup) makes
+    // Clutter measure the text again with them.
+    label.clutter_text.set_attributes(label._msAttributes);
 }
 
 export function label(role, {style_class = '', expand = false, align = Clutter.ActorAlign.START, wrap = false, ellipsize = true} = {}) {
@@ -191,29 +183,23 @@ export function setText(actor, text, {positions = null, role = null} = {}) {
 }
 
 // An St.Entry's own text in a role. St sets the font from the stylesheet
-// on every style change, so it is set again after that. Returns a function
-// that changes the role later.
+// on every style change, so it is set again after that. No attribute list:
+// the tracking goes through the stylesheet, which St turns into attributes
+// in C. Returns a function that changes the role later.
 export function styleEntry(entry, role) {
     let gone = false;
     const set = () => {
         if (gone || !entry.clutter_text)
             return;
         entry.clutter_text.set_font_description(description(role));
-        const attributes = new Pango.AttrList();
-        const tracking = (ROLES[role] ?? ROLES.body).tracking;
-        if (tracking)
-            attributes.insert(Pango.attr_letter_spacing_new(Math.round(tracking * Pango.SCALE)));
-        // An attribute list drops the colour of the stylesheet otherwise.
-        if (entry.get_stage()) {
-            const color = entry.get_theme_node().get_foreground_color();
-            attributes.insert(Pango.attr_foreground_new(color.red * CHANNEL, color.green * CHANNEL, color.blue * CHANNEL));
-        }
-        entry.clutter_text.set_attributes(attributes);
-        entry._msAttributes = attributes;
+        const tracking = (ROLES[role] ?? ROLES.body).tracking ?? 0;
+        const style = tracking ? `letter-spacing: ${tracking}px;` : null;
+        // set_style restyles, which calls set() again; the guard ends that.
+        if (entry.get_style() !== style)
+            entry.set_style(style);
     };
     entry.connect('destroy', () => {
         gone = true;
-        entry._msAttributes = null;
     });
     entry.connect_after('style-changed', set);
     set();
