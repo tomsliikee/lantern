@@ -1,8 +1,8 @@
 // Labels set in a type role, with the matched letters in a heavier cut.
 //
-// St's CSS cannot reach the axes of a variable font (weight), so the role
-// is applied as Pango attributes. St replaces a label's attributes whenever
-// its style is recomputed, so they are applied again after that.
+// St's CSS cannot reach the axes of a variable font (weight), so labels
+// pass Pango markup straight to ClutterText (parsed and owned in C, with no
+// Pango.AttrList or Pango.FontDescription crossing GJS).
 
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
@@ -56,34 +56,25 @@ const ROLES = {
 // The weight of the matched letters.
 const MATCH_WEIGHT = 800;
 
-const descriptions = new Map();
-
-export function description(role, weight = null) {
-    const key = `${role}/${weight}`;
-    if (descriptions.has(key))
-        return descriptions.get(key);
+function fontSpec(role, weight = null) {
     const spec = ROLES[role] ?? ROLES.body;
     // Both stacks end in a generic family, so a missing font still draws.
-    const result = Pango.FontDescription.from_string(spec.mono ? 'monospace' : spec.serif ? serifFamily : family);
+    const fam = spec.mono ? 'monospace' : spec.serif ? serifFamily : family;
     // Points, so the text follows the desktop's text scaling.
-    result.set_size(Math.round(spec.size * PX_TO_PT * Pango.SCALE));
+    const pt = +(spec.size * PX_TO_PT).toFixed(2);
+    const base = `${fam} ${pt}`;
     // Inter's one axis; the serif has a single weight.
-    if (!spec.serif && !spec.mono)
-        result.set_variations(`wght=${weight ?? spec.weight}`);
-    descriptions.set(key, result);
-    return result;
+    return !spec.serif && !spec.mono ? `${base} @wght=${weight ?? spec.weight}` : base;
 }
 
 const escape = text => GLib.markup_escape_text(text, -1);
 const hex2 = v => v.toString(16).padStart(2, '0');
 
-// The label's role as Pango markup. Pango parses it into an attribute list
-// in C, so no Pango.Attribute is ever made or held by JS; the attributes
-// built from JS before were the likeliest cause of the shell crashing under
-// the paint (SIGSEGV in pango_attr_list_copy).
+// The label's role as Pango markup. ClutterText parses it in C via set_markup,
+// so no Pango.AttrList or Pango.FontDescription is ever created or held by JS.
 function markupOf(spec, color) {
     const role = ROLES[spec.role] ?? ROLES.body;
-    const outer = [`font="${escape(description(spec.role).to_string())}"`, 'font_features="tnum=1"'];
+    const outer = [`font="${escape(fontSpec(spec.role))}"`, 'font_features="tnum=1"'];
     if (role.tracking)
         outer.push(`letter_spacing="${Math.round(role.tracking * Pango.SCALE)}"`);
     if (role.line)
@@ -98,7 +89,7 @@ function markupOf(spec, color) {
     const text = spec.text;
     let body = escape(text);
     if (spec.positions?.length > 0 && !role.serif) {
-        const heavy = `<span font="${escape(description(spec.role, MATCH_WEIGHT).to_string())}">`;
+        const heavy = `<span font="${escape(fontSpec(spec.role, MATCH_WEIGHT))}">`;
         const marked = new Set(spec.positions);
         body = '';
         let inRun = false;
@@ -128,17 +119,11 @@ function apply(label) {
         return;
     const color = label.get_stage() ? label.get_theme_node().get_foreground_color() : null;
     const markup = markupOf(spec, color);
-    if (markup !== label._msMarkup) {
-        const [ok, attributes] = Pango.parse_markup(markup, -1, '\0');
-        if (!ok)
-            return;
-        label._msMarkup = markup;
-        label._msAttributes = attributes;
-    }
-    // St replaces a label's attributes whenever its style is recomputed, so
-    // they are set again after that. set_attributes (not set_markup) makes
-    // Clutter measure the text again with them.
-    label.clutter_text.set_attributes(label._msAttributes);
+    if (markup === label._msMarkup)
+        return;
+    label._msMarkup = markup;
+    label.clutter_text.set_markup(markup);
+    label.clutter_text.queue_relayout();
 }
 
 export function label(role, {style_class = '', expand = false, align = Clutter.ActorAlign.START, wrap = false, ellipsize = true} = {}) {
@@ -158,7 +143,7 @@ export function label(role, {style_class = '', expand = false, align = Clutter.A
     actor.connect_after('style-changed', () => apply(actor));
     actor.connect('destroy', () => {
         actor._msGone = true;
-        actor._msAttributes = null;
+        actor._msMarkup = null;
     });
     apply(actor);
     return actor;
@@ -178,30 +163,29 @@ export function setText(actor, text, {positions = null, role = null} = {}) {
     spec.positions = positions;
     if (role)
         spec.role = role;
-    actor.text = text;
     apply(actor);
 }
 
-// An St.Entry's own text in a role. St sets the font from the stylesheet
-// on every style change, so it is set again after that. No attribute list:
-// the tracking goes through the stylesheet, which St turns into attributes
-// in C. Returns a function that changes the role later.
+// An St.Entry's own text in a role, applied purely through inline CSS so no
+// Pango.FontDescription or Pango.AttrList is created or held by JS.
 export function styleEntry(entry, role) {
     let gone = false;
     const set = () => {
         if (gone || !entry.clutter_text)
             return;
-        entry.clutter_text.set_font_description(description(role));
-        const tracking = (ROLES[role] ?? ROLES.body).tracking ?? 0;
-        const style = tracking ? `letter-spacing: ${tracking}px;` : null;
-        // set_style restyles, which calls set() again; the guard ends that.
+        const spec = ROLES[role] ?? ROLES.body;
+        const fam = spec.mono ? 'monospace' : spec.serif ? serifFamily : family;
+        const pt = +(spec.size * PX_TO_PT).toFixed(2);
+        const parts = [`font-family: ${fam};`, `font-size: ${pt}pt;`];
+        if (spec.tracking)
+            parts.push(`letter-spacing: ${spec.tracking}px;`);
+        const style = parts.join(' ');
         if (entry.get_style() !== style)
             entry.set_style(style);
     };
     entry.connect('destroy', () => {
         gone = true;
     });
-    entry.connect_after('style-changed', set);
     set();
     return next => {
         role = next;
